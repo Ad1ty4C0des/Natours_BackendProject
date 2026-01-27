@@ -1,0 +1,82 @@
+# Natours Project: Detailed Architecture & Execution Flow
+
+This document explains exactly how the different files in your project "talk" to each other and how a request travels through your application.
+
+## 1. The Entry Point: Waking up the Server
+**File:** `server.js`
+Everything starts here. When you run `npm start`, this file is executed.
+*   **Database Connection**: It connects to your remote MongoDB database using the connection string from `config.env`.
+*   **Server Launch**: It imports the fully configured express application from `app.js` and starts listening on the specified port.
+*   **Interconnection**: `server.js` requires `app.js`. It wraps the logic defined in `app` and gives it life by binding it to a network port.
+
+## 2. The Application Hub: Request Pipeline
+**File:** `app.js`
+This is the "traffic controller" of your API.
+*   **Middleware Pipeline**: Every request hits this file first. It passes through middleware:
+    1.  `morgan`: For logging (development mode).
+    2.  `express.json()`: **Crucial step**—it takes the raw text sent by a user (req.body) and turns it into a usable JavaScript object.
+    3.  `express.static`: Serves files from the `public` folder.
+    4.  Custom Middleware: Adds a timestamp (`req.requestTime`) to every request.
+*   **Routing (The Switchboard)**:
+    *   Instead of writing all code here, it delegates specific URL paths to separate router files.
+    *   `app.use('/api/v1/tours', tourRouter)` tells Express: "If a URL starts with /api/v1/tours, send it to the `tourRoutes.js` file."
+*   **Interconnection**: `app.js` imports routers from `./routes/tourRoutes.js` and `./routes/userRoutes.js`.
+
+## 3. The Road Map: Defining Routes
+**File:** `routes/tourRoutes.js`
+This file defines *what* happens at specific endpoints (URLs), but not *how*.
+*   **Mapping**: It matches HTTP methods (GET, POST, PATCH, DELETE) to specific functions in the controller.
+    *   `router.route('/').get(tourController.getAllTours)` means: "On a GET request to root (`/`), run the `getAllTours` function."
+*   **Chaining**: It's elegant. `router.route('/:id').get(...).patch(...)` handles different actions on the same ID URL.
+*   **Interconnection**: This file imports `./controllers/tourController.js` so it knows which implementation to trigger for which route.
+
+## 4. The Brain: Controllers and Business Logic
+**File:** `controllers/tourController.js`
+This is where the actual work happens.
+*   **Handling Requests**: Functions like `getAllTours` or `createTour` receive the `req` (request) and `res` (response) objects.
+*   **Using Utilities**:
+    *   It imports `APIFeatures` from `../utils/apiFeatures`. This is a helper class created to decouple complex query logic (filtering `?price[gt]=500`, sorting, pagination) from the controller itself. The controller just says `.filter().sort()` and the class constructs the database query.
+*   **Database Interaction**: The controller doesn't touch the raw database directly; it uses the Mongoose **Model**.
+    *   `Tour.find()`, `Tour.create()`.
+*   **Interconnection**: Imports `Tour` model from `../models/tourModel.js` and `APIFeatures` from `../utils/apiFeatures.js`.
+
+## 5. The Blueprint: Data Models
+**File:** `models/tourModel.js`
+This file defines the "shape" of your data.
+*   **Schema Definition**: It ensures every Tour has a `name`, `price`, `difficulty`, etc. If you try to save a Tour without a name, this file throws an error before it ever reaches the database.
+*   **Business Rules (Middleware)**:
+    *   **Pre-save hooks**: Before saving, it automatically creates a `slug` from the name (e.g., "The Forest Hiker" -> "the-forest-hiker").
+    *   **Query middleware**: Automatically filters out "Secret Tours" so the public API can't see them.
+*   **Virtual Properties**: Calculates fields on the fly (like `durationWeeks`) that aren't stored in the DB but appear in the output.
+*   **Interconnection**: This file is self-contained but depends on external libraries like `mongoose`, `slugify`, and `validator`. It is exported to be used by the Controller.
+
+---
+
+## Summary of the Flow: A "Get All Tours" Request
+
+1.  **Request**: User hits `GET /api/v1/tours?sort=price`.
+2.  **`app.js`**: Receives request, parses JSON, sees the URL starts with `/api/v1/tours`, and forwards it to `tourRouter`.
+3.  **`tourRoutes.js`**: Sees the method is `GET` on `/`, so it calls `tourController.getAllTours`.
+4.  **`tourController.js`**:
+    *   Initializes `APIFeatures` with the `Tour` model and the query string (`sort=price`).
+    *   `APIFeatures` constructs the specific MongoDB query.
+    *   The controller `await`s the result from the database.
+5.  **`tourModel.js`**: Mongoose (via the Model) runs the query middleware (hiding secret tours) and fetches data from MongoDB.
+6.  **Response**: The Controller sends the resulting data back as a JSON object to the user.
+
+## 6. Utilities & Development Tools
+**Data Seeding Script**: `dev-data/data/import-dev-data.js`
+This is a standalone script to quickly populate or wipe your database. It is NOT part of the running application but a tool for the developer.
+*   **Usage**: Run from the project root:
+    *   Import data: `node dev-data/data/import-dev-data.js --import`
+    *   Delete all data: `node dev-data/data/import-dev-data.js --delete`
+*   **How it works**: Connects to the DB (using your `.env` vars), reads `tours-simple.json`, and runs Mongoose commands (`Tour.create` or `Tour.deleteMany`).
+
+**Static Files**: `public/`
+*   The folder contains static assets like generic HTML templates (`overview.html`, `tour.html`) and images.
+*   Currently, they are served as static files via `app.use(express.static(...))`. You can access them directly (e.g., `http://localhost:3000/overview.html`), but they are not yet integrated into a dynamic template engine (like Pug).
+
+## 7. Current Limitations & Missing Pieces
+*   **Global Error Handling**: There is no central error handling middleware in `app.js`. Errors are currently caught individually in try-catch blocks within controllers.
+*   **Unhandled Routes**: If a user visits a generic URL like `/api/v1/random`, Express will return a default HTML 404 error, not a JSON error, because there is no `app.all('*', ...)` handler defined yet.
+*   **User Implementation**: The code for Users (`userController.js`) exists but functionality is not implemented (returns 500 errors).
