@@ -68,7 +68,7 @@ block content
         img.picture-box__img(src=`/img/tours/${img}`, alt=`The Park Camper Tour ${i + 1}`, class= `picture-box__img--${i + 1}`)
 
   section.section-map
-    #map(data-locations=`${JSON.stringify(tour.locations)}` data-token=`pk.eyJ1IjoiYWQxYzBkZXMiLCJhIjoiY21uOWJib2d3MDZmMTJwcXc1bXp0am1layJ9.yYtOYudqw9kVscudebXa7A`)
+    #map(data-locations=`${JSON.stringify(tour.locations)}` data-token=`${mapboxToken}`)
 
   section.section-reviews
     .reviews
