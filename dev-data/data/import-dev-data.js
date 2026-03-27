@@ -42,7 +42,8 @@ const importData = async () => {
   } catch (error) {
     console.log(error);
   }
-  process.exit();
+  // Wait a few seconds for async post-save hooks to finish before exiting
+  setTimeout(() => process.exit(), 3000);
 };
 
 //deleteall database
