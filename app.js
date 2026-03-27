@@ -25,7 +25,41 @@ app.set('views', path.join(__dirname, 'views'));
 //Service static files
 app.use(express.static(path.join(__dirname, 'public')));
 //Set security HTTP headers
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'", 'data:', 'blob:', 'https:', 'ws:'],
+        baseUri: ["'self'"],
+        fontSrc: ["'self'", 'https:', 'data:'],
+        scriptSrc: [
+          "'self'",
+          'https:',
+          'http:',
+          'blob:',
+          'https://*.mapbox.com',
+          'https://*.cloudflare.com',
+          "'unsafe-inline'",
+        ],
+        frameSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+        workerSrc: ["'self'", 'data:', 'blob:', 'https://*.mapbox.com'],
+        childSrc: ["'self'", 'blob:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://*.mapbox.com'],
+        connectSrc: [
+          "'self'",
+          'blob:',
+          'wss:',
+          'https://*.tiles.mapbox.com',
+          'https://api.mapbox.com',
+          'https://events.mapbox.com',
+        ],
+        upgradeInsecureRequests: [],
+      },
+    },
+  })
+);
 
 //Development Logging
 if (process.env.NODE_ENV === 'development') {
