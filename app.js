@@ -70,6 +70,14 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+console.log(`Running in ${nodeEnv} mode`);
+
+if (process.env.NODE_ENV === 'production') {
+  // Production-specific code
+  console.log('Production optimizations enabled');
+}
+
 //Limit request from same API
 const limiter = rateLimit({
   max: 100,
