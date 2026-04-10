@@ -13,7 +13,16 @@ module.exports = class Email {
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
       //sendgrid
-      return 1;
+      return nodemailer.createTransport({
+        service: 'SendGrid',
+        // host: process.env.SENDGRID_HOST,
+        // port: process.env.SENDGRID_PORT,
+        // secure: false,
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          pass: process.env.SENDGRID_PASSWORD,
+        },
+      });
     }
 
     return nodemailer.createTransport({
@@ -37,7 +46,7 @@ module.exports = class Email {
 
     //2. Define email options
     const mailOptions = {
-      from: this.EMAIL_FROM,
+      from: this.from,
       to: this.to,
       subject,
       html,
@@ -51,5 +60,12 @@ module.exports = class Email {
 
   async sendWelcome() {
     await this.send('welcome', 'Welcome to the Natours Family!');
+  }
+
+  async sendPasswordReset() {
+    await this.send(
+      'passwordReset',
+      'Your password reset token (valid for only 10 minutes',
+    );
   }
 };
