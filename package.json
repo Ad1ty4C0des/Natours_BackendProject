@@ -11,8 +11,8 @@
     "dev": "nodemon server.js",
     "prod": "cross-env NODE_ENV=production nodemon server.js",
     "debug": "node --inspect server.js",
-    "build:js": "esbuild public/js/index.js --bundle --outfile=public/js/bundle.js --sourcemap --target=es2020 --format=iife --global-name=app",
-    "watch:js": "esbuild public/js/index.js --bundle --outfile=public/js/bundle.js --sourcemap --target=es2020 --format=iife --global-name=app --watch",
+    "build:js": "npx esbuild public/js/index.js --bundle --outfile=public/js/bundle.js --sourcemap --target=es2020 --format=iife --global-name=app",
+    "watch:js": "npx esbuild public/js/index.js --bundle --outfile=public/js/bundle.js --sourcemap --target=es2020 --format=iife --global-name=app --watch",
     "import:data": "node dev-data/data/import-dev-data.js --import",
     "delete:data": "node dev-data/data/import-dev-data.js --delete"
   },
