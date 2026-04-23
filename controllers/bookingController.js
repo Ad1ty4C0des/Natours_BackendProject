@@ -13,7 +13,6 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
-    // success_url: `${req.protocol}://${req.get('host')}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
     success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`,
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     customer_email: req.user.email,
@@ -41,16 +40,6 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     session,
   });
 });
-
-// exports.createBookingCheckout = catchAsync(async (req, res, next) => {
-//   //This is only temporary, because it's Unsecure everyone can make bookings without paying
-//   const { tour, user, price } = req.query;
-
-//   if (!tour || !user || !price) return next();
-//   await Booking.create({ tour, user, price });
-
-//   res.redirect(req.originalUrl.split('?')[0]);
-// });
 
 const createBookingCheckout = async (session) => {
   const tour = session.client_reference_id;

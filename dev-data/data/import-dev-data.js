@@ -12,14 +12,9 @@ const DB = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD,
 );
 
+// Mongoose 8: Removed deprecated connection options
 mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true, // Add this for a more stable connection logic
-    serverSelectionTimeoutMS: 5000,
-  })
+  .connect(DB)
   .then(() => {
     console.log('MongoDB connected successfully!');
   });
@@ -46,7 +41,7 @@ const importData = async () => {
   setTimeout(() => process.exit(), 3000);
 };
 
-//deleteall database
+//delete all from database
 const deleteData = async () => {
   try {
     await Tour.deleteMany();

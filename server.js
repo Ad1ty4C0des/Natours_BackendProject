@@ -16,12 +16,10 @@ const DB = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD,
 );
 
+// Mongoose 8: Removed deprecated connection options (useNewUrlParser, useCreateIndex,
+// useFindAndModify, useUnifiedTopology). These are now default behavior in Mongoose 8+.
 mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindandModify: false,
-  })
+  .connect(DB)
   .then(() => {
     console.log('MongoDB connected successfully!');
   });

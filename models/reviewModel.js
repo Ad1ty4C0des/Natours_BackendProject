@@ -14,7 +14,7 @@ const reviewSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     tour: {
       type: mongoose.Schema.ObjectId,
@@ -36,13 +36,6 @@ const reviewSchema = new mongoose.Schema(
 reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
 reviewSchema.pre(/^find/, function (next) {
-  // this.populate({
-  //   path: 'tour',
-  //   select: 'name',
-  // }).populate({
-  //   path: 'user',
-  //   select: 'name photo',
-  // });
   this.populate({
     path: 'user',
     select: 'name photo',
@@ -80,16 +73,13 @@ reviewSchema.post('save', function () {
   this.constructor.calcAverageRating(this.tour);
 });
 
-//findByIdAndUpdate
-//findByIdAndDelete
-reviewSchema.pre(/^findOneAnd/, async function (next) {
-  this.r = await this.findOne();
-  next();
-});
-
-reviewSchema.post(/^findOneAnd/, async function () {
-  // await this.findOne() does not work here, because query is already executed
-  await this.r.constructor.calcAverageRating(this.r.tour);
+// Mongoose 8: Use the document passed to post hook for findOneAnd queries
+// instead of the old pattern of saving to `this.r` in a pre hook.
+// In Mongoose 8, post('findOneAnd*') receives the document as the first argument.
+reviewSchema.post(/^findOneAnd/, async function (doc) {
+  if (doc) {
+    await doc.constructor.calcAverageRating(doc.tour);
+  }
 });
 
 const Review = mongoose.model('Review', reviewSchema);

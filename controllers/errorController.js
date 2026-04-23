@@ -8,7 +8,10 @@ const handlevalidationErrorDB = (err) => {
 };
 
 const handleDuplicateFieldDB = (err) => {
-  const value = err.keyValue.name;
+  // Mongoose 8 may format keyValue differently; safely extract the value
+  const value = err.keyValue
+    ? Object.values(err.keyValue)[0]
+    : 'unknown value';
   const message = `Duplicate field value: "${value}". Please use another value!`;
   return new AppError(message, 400);
 };

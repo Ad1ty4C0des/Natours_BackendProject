@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
@@ -7,7 +6,7 @@ const AppError = require('./../utils/appError');
 const Email = require('../utils/email');
 
 const signToken = (id) =>
-  jwt.sign({ id: id }, process.env.JWT_SECRET, {
+  jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRESIN,
   });
 
@@ -22,8 +21,6 @@ const createSendToken = (user, statusCode, req, res) => {
     secure: req.secure || process.env.NODE_ENV === 'production',
   };
 
-  // if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-
   res.cookie('jwt', token, cookieOptions);
 
   user.password = undefined;
@@ -32,7 +29,7 @@ const createSendToken = (user, statusCode, req, res) => {
     status: 'success',
     token,
     data: {
-      user: user,
+      user,
     },
   });
 };
@@ -51,7 +48,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   //1. Check if email and password exist
   if (!email || !password) {
-    next(new AppError('Please provide email and password', 400));
+    return next(new AppError('Please provide email and password', 400));
   }
 
   //2. Check if User exist and password is correct
@@ -93,8 +90,13 @@ exports.protected = catchAsync(async (req, res, next) => {
     );
   }
 
-  //2. Verification token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  //2. Verification token — use native Promise-based jwt.verify
+  const decoded = await new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+      if (err) return reject(err);
+      resolve(payload);
+    });
+  });
 
   //3. Check if user still exists
   const currentUser = await User.findById(decoded.id);
@@ -124,11 +126,13 @@ exports.protected = catchAsync(async (req, res, next) => {
 exports.isLoggedIn = async (req, res, next) => {
   try {
     if (req.cookies.jwt) {
-      //2. Verification jwt
-      const decoded = await promisify(jwt.verify)(
-        req.cookies.jwt,
-        process.env.JWT_SECRET,
-      );
+      //2. Verification jwt — use native Promise-based jwt.verify
+      const decoded = await new Promise((resolve, reject) => {
+        jwt.verify(req.cookies.jwt, process.env.JWT_SECRET, (err, payload) => {
+          if (err) return reject(err);
+          resolve(payload);
+        });
+      });
 
       //3. Check if user still exists
       const currentUser = await User.findById(decoded.id);

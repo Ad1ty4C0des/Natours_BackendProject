@@ -5,3 +5,20 @@ config.env
 # Build artifacts
 # public/js/bundle.js
 # public/js/bundle.js.map
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+#migration report
+full_audit_report.md
+migration_summary.md
+CHANGELOG.txt
