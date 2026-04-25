@@ -1,0 +1,95 @@
+extends base
+
+mixin navItem(link, text, icon, active)
+  li(class=active ? 'side-nav--active' : '')
+    a(href=`${link}`)
+      svg
+        use(xlink:href=`img/icons.svg#icon-${icon}`)
+      | #{text}
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          +navItem('/me', 'Settings', 'settings')
+          +navItem('/my-tours', 'My bookings', 'briefcase')
+          +navItem('/my-reviews', 'My reviews', 'star', true)
+          +navItem('/my-favourites', 'My favourites', 'heart')
+          +navItem('/billing', 'Billing', 'credit-card')
+
+        - if(user.role === 'admin')
+          .admin-nav
+            h5.admin-nav__heading Admin
+            ul.side-nav
+              +navItem('/manage-tours', 'Manage tours', 'map')
+              +navItem('/manage-users', 'Manage users', 'users')
+              +navItem('/manage-reviews', 'Manage reviews', 'star')
+              +navItem('/manage-bookings', 'Manage bookings', 'briefcase')
+
+      .user-view__content
+        .user-view__form-container
+          h2.heading-secondary.ma-bt-md My Reviews
+
+          if reviews.length === 0
+            .my-reviews__empty
+              svg.my-reviews__empty-icon
+                use(xlink:href='/img/icons.svg#icon-star')
+              p.my-reviews__empty-text You haven't written any reviews yet. Book a tour and share your experience!
+              a.btn.btn--green(href='/') Browse Tours
+
+          else
+            each review in reviews
+              .my-review-card(data-review-id=`${review._id}`)
+                .my-review-card__header
+                  if review.tour
+                    img.my-review-card__tour-img(
+                      src=`/img/tours/${review.tour.imageCover}`
+                      alt=`${review.tour.name}`
+                    )
+                  .my-review-card__tour-info
+                    if review.tour
+                      a.my-review-card__tour-name(href=`/tour/${review.tour.slug}`)= review.tour.name
+                    .my-review-card__date= review.createdAt.toLocaleString('en-us', {month: 'long', day: 'numeric', year: 'numeric'})
+
+                .my-review-card__body
+                  //- Display mode
+                  .my-review-card__display
+                    .my-review-card__rating
+                      each star in [1, 2, 3, 4, 5]
+                        svg.my-review-card__star(class= `my-review-card__star--${review.rating >= star ? 'active' : 'inactive'}`)
+                          use(xlink:href='/img/icons.svg#icon-star')
+                    p.my-review-card__text= review.review
+
+                  //- Edit mode (hidden by default)
+                  .my-review-card__edit(style='display: none;')
+                    .form__group.form__rating-group
+                      label.form__label Rating
+                      .form__stars.edit-rating-stars
+                        each star in [1, 2, 3, 4, 5]
+                          svg.form__star(
+                            data-value=`${star}`
+                            class= `form__star--${review.rating >= star ? 'active' : 'inactive'}`
+                          )
+                            use(xlink:href='/img/icons.svg#icon-star')
+                      input.edit-rating-input(type='hidden' value=`${review.rating}`)
+
+                    .form__group
+                      textarea.form__input.form__textarea.edit-review-text(
+                        rows='4'
+                        required
+                      )= review.review
+
+                    .my-review-card__edit-actions
+                      button.btn.btn--small.btn--green.btn--save-review Save
+                      button.btn.btn--small.btn--cancel-review Cancel
+
+                .my-review-card__actions
+                  button.btn-small.btn--edit-review
+                    svg.my-review-card__action-icon
+                      use(xlink:href='/img/icons.svg#icon-edit')
+                    | Edit
+                  button.btn-small.btn--delete-review
+                    svg.my-review-card__action-icon
+                      use(xlink:href='/img/icons.svg#icon-trash-2')
+                    | Delete

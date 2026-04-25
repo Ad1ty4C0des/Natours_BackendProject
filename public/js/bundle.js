@@ -2886,9 +2886,62 @@ var app = (() => {
         method: "GET",
         url: "/api/v1/users/logout"
       });
-      if (res.data.status === "success") location.reload(true);
+      if (res.data.status === "success") location.assign("/");
     } catch (err) {
       showAlert("error", "Error logging out! Try again.");
+    }
+  };
+  var signup = async (name, email, password, passwordConfirm) => {
+    try {
+      const res = await axios_default({
+        method: "POST",
+        url: "/api/v1/users/signup",
+        data: {
+          name,
+          email,
+          password,
+          passwordConfirm
+        }
+      });
+      if (res.data.status === "success") {
+        showAlert("success", "Account created successfully!");
+        window.setTimeout(() => {
+          location.assign("/");
+        }, 1500);
+      }
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  };
+  var forgotPassword = async (email) => {
+    try {
+      const res = await axios_default({
+        method: "POST",
+        url: "/api/v1/users/forgotPassword",
+        data: { email }
+      });
+      if (res.data.status === "success") {
+        showAlert("success", "Password reset link sent to your email!");
+      }
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  };
+  var resetPassword = async (password, passwordConfirm, token) => {
+    try {
+      const res = await axios_default({
+        method: "PATCH",
+        url: `/api/v1/users/resetPassword/${token}`,
+        data: { password, passwordConfirm }
+      });
+      if (res.data.status === "success") {
+        showAlert("success", "Password reset successful! Logging you in...");
+        window.setTimeout(() => {
+          location.assign("/");
+        }, 1500);
+      }
+    } catch (err) {
+      showAlert("error", err.response.data.message);
     }
   };
 
@@ -2913,13 +2966,105 @@ var app = (() => {
   var stripe = Stripe(
     "pk_test_51TLmZADbmknP91hYFHrIFb9zZb0tKy3Ss0S8m3nxsF2xqG7PWA657qWalgaFmqFa8xJuE3qrFIOExQeyfdiQ2JY700bGQvZVIc"
   );
-  var bookTour = async (tourId) => {
+  var bookTour = async (tourId, startDate, numPeople = 1) => {
     try {
-      const session = await axios_default(`/api/v1/bookings/checkout-session/${tourId}`);
+      const session = await axios_default(
+        `/api/v1/bookings/checkout-session/${tourId}?startDate=${startDate}&numPeople=${numPeople}`
+      );
       window.location.assign(session.data.session.url);
     } catch (err) {
       console.log(err);
-      showAlert("error", err);
+      showAlert("error", err.response?.data?.message || "Something went wrong!");
+    }
+  };
+
+  // public/js/review.js
+  var submitReview = async (tourId, review, rating) => {
+    try {
+      const res = await axios_default({
+        method: "POST",
+        url: `/api/v1/tours/${tourId}/reviews`,
+        data: {
+          review,
+          rating
+        }
+      });
+      if (res.data.status === "success") {
+        showAlert("success", "Review submitted successfully!");
+        window.setTimeout(() => {
+          location.reload(true);
+        }, 1500);
+      }
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  };
+  var editReview = async (reviewId, review, rating) => {
+    try {
+      const res = await axios_default({
+        method: "PATCH",
+        url: `/api/v1/reviews/${reviewId}`,
+        data: {
+          review,
+          rating
+        }
+      });
+      if (res.data.status === "success") {
+        showAlert("success", "Review updated successfully!");
+        window.setTimeout(() => {
+          location.reload(true);
+        }, 1500);
+      }
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  };
+  var deleteReview = async (reviewId) => {
+    try {
+      await axios_default({
+        method: "DELETE",
+        url: `/api/v1/reviews/${reviewId}`
+      });
+      showAlert("success", "Review deleted successfully!");
+      window.setTimeout(() => {
+        location.reload(true);
+      }, 1500);
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  };
+
+  // public/js/favourite.js
+  var toggleFavourite = async (tourId, heartEl) => {
+    try {
+      const res = await axios_default({
+        method: "POST",
+        url: `/api/v1/favourites/toggle/${tourId}`
+      });
+      if (res.data.status === "success") {
+        const isFav = res.data.data.favourited;
+        heartEl.classList.toggle("heart--active", isFav);
+        heartEl.classList.toggle("heart--inactive", !isFav);
+        showAlert("success", isFav ? "Added to favourites!" : "Removed from favourites");
+      }
+    } catch (err) {
+      showAlert("error", err.response?.data?.message || "Please log in to like tours");
+    }
+  };
+
+  // public/js/admin.js
+  var deleteResource = async (resource, id) => {
+    try {
+      await axios_default({
+        method: "DELETE",
+        url: `/api/v1/${resource}/${id}`
+      });
+      showAlert("success", `${resource.slice(0, -1)} deleted successfully!`);
+      window.setTimeout(() => {
+        location.reload();
+      }, 1500);
+    } catch (err) {
+      showAlert("error", err.response?.data?.message || "Error deleting resource");
     }
   };
 
@@ -2930,6 +3075,11 @@ var app = (() => {
   var userDataForm = document.querySelector(".form-user-data");
   var userPasswordForm = document.querySelector(".form-user-password");
   var bookBtn = document.getElementById("book-tour");
+  var reviewForm = document.getElementById("review-form");
+  var ratingStars = document.querySelectorAll(".form__star");
+  var signupForm = document.querySelector(".form--signup");
+  var forgotPasswordForm = document.querySelector(".form--forgot-password");
+  var resetPasswordForm = document.querySelector(".form--reset-password");
   if (mapBox) {
     mapboxgl.accessToken = mapBox.dataset.token;
     const locations = JSON.parse(mapBox.dataset.locations);
@@ -2945,6 +3095,38 @@ var app = (() => {
   }
   if (logoutBtn) {
     logoutBtn.addEventListener("click", logout);
+  }
+  if (signupForm) {
+    signupForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const passwordConfirm = document.getElementById("password-confirm").value;
+      signup(name, email, password, passwordConfirm);
+    });
+  }
+  if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const btn = document.querySelector(".btn--forgot-password");
+      btn.textContent = "Sending...";
+      const email = document.getElementById("email").value;
+      forgotPassword(email).then(() => {
+        btn.textContent = "Send reset link";
+      });
+    });
+  }
+  if (resetPasswordForm) {
+    resetPasswordForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const btn = document.querySelector(".btn--reset-password");
+      btn.textContent = "Resetting...";
+      const password = document.getElementById("password").value;
+      const passwordConfirm = document.getElementById("password-confirm").value;
+      const token = resetPasswordForm.dataset.token;
+      resetPassword(password, passwordConfirm, token);
+    });
   }
   if (userDataForm) {
     userDataForm.addEventListener("submit", (e) => {
@@ -2973,12 +3155,189 @@ var app = (() => {
       document.getElementById("password-confirm").value = "";
     });
   }
+  var tourDateSelect = document.getElementById("tour-date");
+  var numPeopleInput = document.getElementById("num-people");
+  var peopleMinus = document.getElementById("people-minus");
+  var peoplePlus = document.getElementById("people-plus");
+  if (tourDateSelect && numPeopleInput) {
+    tourDateSelect.addEventListener("change", () => {
+      const selectedDate = tourDateSelect.value;
+      if (!selectedDate) {
+        numPeopleInput.max = 1;
+        numPeopleInput.value = 1;
+        return;
+      }
+      const dates = JSON.parse(tourDateSelect.dataset.dates || "[]");
+      const maxGroup = parseInt(tourDateSelect.dataset.maxGroup, 10) || 1;
+      const dateObj = dates.find((d) => d.date === selectedDate);
+      if (dateObj) {
+        const spotsLeft = maxGroup - dateObj.participants;
+        numPeopleInput.max = spotsLeft;
+        numPeopleInput.value = Math.min(parseInt(numPeopleInput.value, 10), spotsLeft) || 1;
+      }
+    });
+  }
+  if (peopleMinus && numPeopleInput) {
+    peopleMinus.addEventListener("click", () => {
+      const current = parseInt(numPeopleInput.value, 10);
+      if (current > 1) numPeopleInput.value = current - 1;
+    });
+  }
+  if (peoplePlus && numPeopleInput) {
+    peoplePlus.addEventListener("click", () => {
+      const current = parseInt(numPeopleInput.value, 10);
+      const max = parseInt(numPeopleInput.max, 10) || 1;
+      if (current < max) numPeopleInput.value = current + 1;
+    });
+  }
   if (bookBtn)
     bookBtn.addEventListener("click", (e) => {
+      const dateSelect = document.getElementById("tour-date");
+      const startDate = dateSelect ? dateSelect.value : "";
+      if (!startDate) {
+        showAlert("error", "Please select a start date before booking!");
+        return;
+      }
+      const numPeople = parseInt(document.getElementById("num-people")?.value, 10) || 1;
       e.target.textContent = "Processing...";
       const { tourId } = e.target.dataset;
-      bookTour(tourId);
+      bookTour(tourId, startDate, numPeople);
     });
+  if (ratingStars.length > 0) {
+    let selectedRating = 0;
+    const highlightStars = (rating) => {
+      ratingStars.forEach((star) => {
+        const val = parseInt(star.dataset.value, 10);
+        star.classList.toggle("form__star--active", val <= rating);
+        star.classList.toggle("form__star--inactive", val > rating);
+      });
+    };
+    ratingStars.forEach((star) => {
+      star.addEventListener("click", () => {
+        selectedRating = parseInt(star.dataset.value, 10);
+        document.getElementById("review-rating").value = selectedRating;
+        highlightStars(selectedRating);
+      });
+      star.addEventListener("mouseenter", () => {
+        highlightStars(parseInt(star.dataset.value, 10));
+      });
+      star.addEventListener("mouseleave", () => {
+        highlightStars(selectedRating);
+      });
+    });
+  }
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const tourId = reviewForm.dataset.tourId;
+      const review = document.getElementById("review-text").value;
+      const rating = parseInt(document.getElementById("review-rating").value, 10);
+      if (!rating || rating < 1) {
+        showAlert("error", "Please select a star rating before submitting.");
+        return;
+      }
+      document.querySelector(".btn--submit-review").textContent = "Submitting...";
+      submitReview(tourId, review, rating);
+    });
+  }
+  var myReviewCards = document.querySelectorAll(".my-review-card");
+  if (myReviewCards.length > 0) {
+    const setupEditStars = (card) => {
+      const stars = card.querySelectorAll(".edit-rating-stars .form__star");
+      const ratingInput = card.querySelector(".edit-rating-input");
+      let selected = parseInt(ratingInput.value, 10);
+      const highlight = (rating) => {
+        stars.forEach((s) => {
+          const v = parseInt(s.dataset.value, 10);
+          s.classList.toggle("form__star--active", v <= rating);
+          s.classList.toggle("form__star--inactive", v > rating);
+        });
+      };
+      stars.forEach((star) => {
+        star.addEventListener("click", () => {
+          selected = parseInt(star.dataset.value, 10);
+          ratingInput.value = selected;
+          highlight(selected);
+        });
+        star.addEventListener("mouseenter", () => {
+          highlight(parseInt(star.dataset.value, 10));
+        });
+        star.addEventListener("mouseleave", () => {
+          highlight(selected);
+        });
+      });
+    };
+    myReviewCards.forEach((card) => {
+      const reviewId = card.dataset.reviewId;
+      const displayEl = card.querySelector(".my-review-card__display");
+      const editEl = card.querySelector(".my-review-card__edit");
+      const actionsEl = card.querySelector(".my-review-card__actions");
+      const editBtn = card.querySelector(".btn--edit-review");
+      const deleteBtn = card.querySelector(".btn--delete-review");
+      const saveBtn = card.querySelector(".btn--save-review");
+      const cancelBtn = card.querySelector(".btn--cancel-review");
+      editBtn.addEventListener("click", () => {
+        displayEl.style.display = "none";
+        actionsEl.style.display = "none";
+        editEl.style.display = "block";
+        setupEditStars(card);
+      });
+      cancelBtn.addEventListener("click", () => {
+        editEl.style.display = "none";
+        displayEl.style.display = "block";
+        actionsEl.style.display = "flex";
+      });
+      saveBtn.addEventListener("click", () => {
+        const newReview = card.querySelector(".edit-review-text").value;
+        const newRating = parseInt(
+          card.querySelector(".edit-rating-input").value,
+          10
+        );
+        if (!newRating || newRating < 1) {
+          showAlert("error", "Please select a star rating.");
+          return;
+        }
+        saveBtn.textContent = "Saving...";
+        editReview(reviewId, newReview, newRating);
+      });
+      deleteBtn.addEventListener("click", () => {
+        const confirmed = confirm(
+          "Are you sure you want to delete this review? This cannot be undone."
+        );
+        if (confirmed) {
+          deleteBtn.textContent = "Deleting...";
+          deleteReview(reviewId);
+        }
+      });
+    });
+  }
+  var heartBtns = document.querySelectorAll(".heart-btn");
+  if (heartBtns.length > 0) {
+    heartBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const tourId = btn.dataset.tourId;
+        toggleFavourite(tourId, btn);
+      });
+    });
+  }
+  var deleteBtns = document.querySelectorAll(".btn-delete-resource");
+  if (deleteBtns.length > 0) {
+    deleteBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const resource = btn.dataset.resource;
+        const id = btn.dataset.id;
+        const confirmed = confirm(
+          `Are you sure you want to delete this ${resource.slice(0, -1)}? This cannot be undone.`
+        );
+        if (confirmed) {
+          btn.closest(".manage-table__row").style.opacity = "0.5";
+          deleteResource(resource, id);
+        }
+      });
+    });
+  }
   var alertMessage = document.querySelector("body").dataset.alert;
   if (alertMessage) showAlert("success", alertMessage, 7);
 })();

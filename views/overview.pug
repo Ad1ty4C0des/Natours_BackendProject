@@ -4,12 +4,30 @@ block content
   main.main 
     .card-container
 
+      if !tours || tours.length === 0
+        .empty-state
+          svg.empty-state__icon
+            use(xlink:href='/img/icons.svg#icon-heart')
+          h2.heading-secondary Nothing here yet!
+          if title === 'My Favourite Tours'
+            p.empty-state__text You haven't added any favourites yet. Explore our tours and tap the heart to save your favourites!
+          else if title === 'My Tours'
+            p.empty-state__text You haven't booked any tours yet. Start your adventure today!
+          else
+            p.empty-state__text No tours to display right now.
+          a.btn.btn--green(href='/') Browse Tours
+
       each tour in tours
         .card
           .card__header
             .card__picture
               .card__picture-overlay &nbsp;
               img.card__picture-img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+            if user
+              - const isFav = favouriteIds && favouriteIds.includes(tour._id.toString())
+              button.heart-btn(data-tour-id=`${tour._id}`, class=isFav ? 'heart--active' : 'heart--inactive', title=isFav ? 'Remove from favourites' : 'Add to favourites')
+                svg.heart-icon
+                  use(xlink:href=`/img/icons.svg#icon-heart`)
             h3.heading-tertirary
               span= tour.name
 
@@ -23,7 +41,7 @@ block content
             .card__data
               svg.card__icon
                 use(xlink:href='/img/icons.svg#icon-calendar')
-              span= tour.startDates[0].toLocaleString('en-us', {month: 'long', year: 'numeric'})
+              span= tour.startDates && tour.startDates[0] ? tour.startDates[0].date.toLocaleString('en-us', {month: 'long', year: 'numeric'}) : 'TBD'
             .card__data
               svg.card__icon
                 use(xlink:href='/img/icons.svg#icon-flag')

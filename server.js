@@ -1,5 +1,10 @@
+const dns = require('dns');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+
+// Node.js 20+ defaults to 'verbatim' DNS resolution (IPv6 first).
+// MongoDB Atlas doesn't support IPv6, causing ECONNREFUSED on SRV lookups.
+dns.setDefaultResultOrder('ipv4first');
 
 dotenv.config({ path: './config.env' });
 

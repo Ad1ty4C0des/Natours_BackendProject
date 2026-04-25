@@ -1,0 +1,43 @@
+extends base
+
+block content
+  main.main
+    .manage-page
+      .manage-header
+        h2.heading-secondary Manage Tours
+        p.manage-subtitle= `${tours.length} tours total`
+
+      if tours.length === 0
+        .manage-empty
+          svg.manage-empty__icon
+            use(xlink:href='/img/icons.svg#icon-map')
+          p.manage-empty__text No tours found.
+
+      else
+        .manage-table
+          .manage-table__head
+            .manage-table__row
+              span.manage-table__cell.manage-table__cell--header Image
+              span.manage-table__cell.manage-table__cell--header.manage-table__cell--grow Name
+              span.manage-table__cell.manage-table__cell--header Duration
+              span.manage-table__cell.manage-table__cell--header Price
+              span.manage-table__cell.manage-table__cell--header Difficulty
+              span.manage-table__cell.manage-table__cell--header Rating
+              span.manage-table__cell.manage-table__cell--header Actions
+
+          .manage-table__body
+            each tour in tours
+              .manage-table__row(data-id=`${tour._id}`)
+                span.manage-table__cell
+                  img.manage-table__img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+                span.manage-table__cell.manage-table__cell--grow.manage-table__cell--name= tour.name
+                span.manage-table__cell= `${tour.duration} days`
+                span.manage-table__cell= `$${tour.price}`
+                span.manage-table__cell
+                  span.manage-badge(class=`manage-badge--${tour.difficulty}`)= tour.difficulty
+                span.manage-table__cell= `${tour.ratingsAverage || tour.ratingAverage || 0} ⭐`
+                span.manage-table__cell.manage-table__cell--actions
+                  a.manage-btn.manage-btn--view(href=`/tour/${tour.slug}`, title='View')
+                    svg: use(xlink:href='/img/icons.svg#icon-eye')
+                  button.manage-btn.manage-btn--delete.btn-delete-resource(data-resource='tours', data-id=`${tour._id}`, title='Delete')
+                    svg: use(xlink:href='/img/icons.svg#icon-trash-2')

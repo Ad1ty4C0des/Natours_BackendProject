@@ -12,12 +12,9 @@ module.exports = class Email {
 
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
-      //sendgrid
+      // SendGrid — delivers to real inboxes
       return nodemailer.createTransport({
         service: 'SendGrid',
-        // host: process.env.SENDGRID_HOST,
-        // port: process.env.SENDGRID_PORT,
-        // secure: false,
         auth: {
           user: process.env.SENDGRID_USERNAME,
           pass: process.env.SENDGRID_PASSWORD,
@@ -25,6 +22,7 @@ module.exports = class Email {
       });
     }
 
+    // Fallback: Mailtrap (for testing only — emails won't reach real inboxes)
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,

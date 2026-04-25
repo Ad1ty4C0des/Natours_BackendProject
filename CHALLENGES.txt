@@ -1,0 +1,742 @@
+================================================================================
+CHALLENGES.txt — Review Feature Implementation
+================================================================================
+
+==================
+> controllers/reviewController.js (existing)
+> Added: checkIfBooked middleware + Booking, catchAsync, AppError imports
+> HOW IT WORKS:
+  - A new middleware `checkIfBooked` is added before `createReviews`.
+  - It extracts the tour ID from `req.params.tourId` (nested route) or `req.body.tour`.
+  - It queries the Booking model: `Booking.findOne({ tour: tourId, user: req.user.id })`.
+  - If no booking is found, it returns a 403 error: "You can only review a tour
+    that you have booked."
+  - It also checks if the user has already reviewed the tour using
+    `Review.findOne({ tour, user })`.
+  - If a review already exists, it returns a 400 error telling them to update instead.
+  - This ensures both booking verification AND duplicate review prevention at the
+    API level.
+==================
+
+==================
+> routes/reviewRoutes.js (existing)
+> Added: reviewController.checkIfBooked to the POST route middleware chain
+> HOW IT WORKS:
+  - The POST '/' route now runs this middleware chain:
+    1. authController.restrictTo('user')   — only 'user' role allowed
+    2. reviewController.setTourUserIds     — auto-sets tour and user IDs
+    3. reviewController.checkIfBooked      — verifies booking exists & no duplicate
+    4. reviewController.createReviews      — creates the review (factory handler)
+  - The checkIfBooked middleware sits after setTourUserIds so that req.body.tour
+    and req.body.user are guaranteed to be populated before the booking check runs.
+==================
+
+==================
+> controllers/viewsController.js (existing)
+> Added: Review model import, booking/review check in getTour, passes hasBooked
+  & hasReviewed flags to template
+> HOW IT WORKS:
+  - When a logged-in user visits a tour detail page, the controller queries:
+    * Booking.findOne({ tour, user }) — checks if they've booked → hasBooked
+    * Review.findOne({ tour, user })  — checks if they've already reviewed → hasReviewed
+  - Both boolean flags are passed into the Pug template so the view can
+    conditionally render the review form, a "thanks" message, or nothing at all.
+  - For non-logged-in users, both flags default to false so nothing extra shows.
+==================
+
+==================
+> views/tour.pug (existing)
+> Added: Review form section between reviews and CTA sections + safety checks
+> HOW IT WORKS:
+  - Uses Pug conditionals: `if user && hasBooked` to show the section.
+  - If hasReviewed is true → shows a "Thanks for your review!" confirmation
+    with a green check icon instead of the form.
+  - If hasReviewed is false → shows the full review form with:
+    * Interactive star rating (5 SVG stars using the existing icon sprite)
+    * A hidden input (`#review-rating`) that stores the selected rating value
+    * A textarea for the review text
+    * A submit button
+  - The form has `data-tour-id` attribute so client-side JS knows which tour
+    to send the review to.
+  - Also added safety checks for tour.startDates[0] and tour.images[1]/[2]
+    to prevent crashes on tours with incomplete data.
+==================
+
+==================
+> views/overview.pug (existing)
+> Added: Safety check for tour.startDates[0]
+> HOW IT WORKS:
+  - tour.startDates[0] is now guarded with a ternary check.
+  - If startDates is empty or undefined, it displays 'TBD' instead of crashing.
+==================
+
+==================
+> public/js/review.js (new)
+> New: Client-side module for submitting reviews via API
+> HOW IT WORKS:
+  - Exports a `submitReview(tourId, review, rating)` async function.
+  - Uses axios to POST to `/api/v1/tours/${tourId}/reviews` (nested review route).
+  - On success → shows a green success alert and reloads the page after 1.5s
+    so the new review appears in the reviews carousel.
+  - On error → shows a red error alert with the server's error message.
+==================
+
+==================
+> public/js/index.js (existing)
+> Added: Review module import, star rating interaction, form submit handler
+> HOW IT WORKS:
+  - Imports `submitReview` from the new review.js module.
+  - Selects DOM elements: `#review-form` and all `.form__star` elements.
+  - Star rating interaction:
+    * On click: stores the selected rating, updates hidden input, highlights stars.
+    * On mouseenter: temporarily highlights stars up to the hovered star (preview).
+    * On mouseleave: reverts to the selected (clicked) rating.
+  - Form submission:
+    * Prevents default, reads tourId from form's data attribute.
+    * Reads review text and rating value.
+    * Validates that a rating was selected (shows error alert if not).
+    * Changes button text to "Submitting..." and calls submitReview().
+==================
+
+==================
+> public/css/style.css (existing)
+> Added: ~130 lines of CSS for .section-review-form and related elements
+> HOW IT WORKS:
+  - `.section-review-form` handles page-level spacing using the section-rotate
+    CSS variable to blend seamlessly with the existing tour page layout.
+  - `.review-form-container` is a centered white card with rounded corners,
+    box shadow, and a gradient top border (via ::before pseudo-element)
+    matching the green Natours theme.
+  - `.form__stars` uses flexbox with gap for star layout.
+  - `.form__star` has hover scale(1.2) animation for interactivity.
+  - `.form__star--active` uses gold (#f9a825) fill with a matching drop-shadow
+    glow. Inactive stars are light gray (#ddd).
+  - `.form__textarea` is a resizable textarea with min/max height constraints.
+  - `.review-form__done` styles the "already reviewed" confirmation state
+    with centered text and a green check icon.
+  - Responsive: padding reduces on screens narrower than 50em.
+==================
+
+
+================================================================================
+My Reviews Page — Implementation
+================================================================================
+
+==================
+> controllers/viewsController.js (existing)
+> Added: getMyReviews handler
+> HOW IT WORKS:
+  - Queries `Review.find({ user: req.user.id })` to get all reviews by the
+    logged-in user.
+  - Populates the `tour` field with `name`, `slug`, and `imageCover` so the
+    template can display tour info and link to the tour detail page.
+  - Renders the new `myReviews.pug` template with the reviews array.
+==================
+
+==================
+> routes/viewRoutes.js (existing)
+> Added: GET /my-reviews route
+> HOW IT WORKS:
+  - New route at `/my-reviews` protected by `authController.protected`.
+  - Maps to `viewsController.getMyReviews`.
+  - Only authenticated users can access this page.
+==================
+
+==================
+> views/account.pug (existing)
+> Changed: Updated "My reviews" sidebar link from '#' to '/my-reviews'
+> HOW IT WORKS:
+  - The navItem mixin call now points to `/my-reviews` instead of `#`.
+  - Clicking "My reviews" in the account sidebar navigates to the new page.
+==================
+
+==================
+> views/myReviews.pug (new)
+> New: My Reviews page template
+> HOW IT WORKS:
+  - Extends `base.pug` and reuses the same `user-view` layout as `account.pug`
+    with the side navigation (Settings, My bookings, My reviews, Billing).
+  - The "My reviews" nav item is marked as active on this page.
+  - If the user has no reviews, an empty state is shown with a star icon,
+    helpful message, and a "Browse Tours" CTA button.
+  - Each review is rendered as a `.my-review-card` with:
+    * HEADER: Tour cover image (circular), tour name (clickable link to tour
+      detail page), and the review creation date.
+    * BODY — Display mode: Star rating (gold/gray SVG stars) + review text.
+    * BODY — Edit mode (hidden by default): Interactive star rating picker +
+      pre-filled textarea + Save/Cancel buttons.
+    * FOOTER: Edit and Delete action buttons with SVG icons.
+  - Each card has `data-review-id` so client-side JS can identify which review
+    to update or delete via the API.
+  - Edit mode toggles inline — no page navigation needed.
+==================
+
+==================
+> public/js/review.js (existing)
+> Added: editReview and deleteReview functions
+> HOW IT WORKS:
+  - `editReview(reviewId, review, rating)`: Sends a PATCH request to
+    `/api/v1/reviews/${reviewId}` with the updated review text and rating.
+    On success, shows a green alert and reloads the page after 1.5s.
+  - `deleteReview(reviewId)`: Sends a DELETE request to
+    `/api/v1/reviews/${reviewId}`. On success, shows a green alert and
+    reloads. The review is permanently removed from the database.
+  - Both use the existing review API routes which already support PATCH
+    and DELETE for users and admins.
+==================
+
+==================
+> public/js/index.js (existing)
+> Added: My Reviews page event handlers (edit/delete/save/cancel)
+> HOW IT WORKS:
+  - Selects all `.my-review-card` elements on the page.
+  - For each card, attaches event listeners to:
+    * Edit button: Hides display mode, shows edit mode, initializes star
+      rating interaction within that specific card's edit area.
+    * Cancel button: Hides edit mode, restores display mode.
+    * Save button: Reads the new review text and rating from the card's
+      edit form, validates rating >= 1, calls `editReview()`.
+    * Delete button: Shows a browser `confirm()` dialog. If confirmed,
+      calls `deleteReview()`.
+  - Star rating in edit mode uses a per-card `setupEditStars()` helper
+    that scopes the hover/click interactions to only that card's stars
+    (important since multiple cards exist on the same page).
+==================
+
+==================
+> public/css/style.css (existing)
+> Added: ~200 lines of CSS for .my-review-card and related elements
+> HOW IT WORKS:
+  - `.my-review-card` is a white card with rounded corners, subtle border,
+    and box-shadow. Has a hover lift effect (translateY + deeper shadow).
+  - `.my-review-card__header` is a flex row with light gray background
+    containing the circular tour image and tour info column.
+  - `.my-review-card__tour-name` is a clickable link that turns green on hover.
+  - `.my-review-card__rating` uses gold (#f9a825) for active stars and
+    gray (#ddd) for inactive, same as the tour detail review form.
+  - `.my-review-card__actions` is a flex row with Edit (green) and
+    Delete (red) buttons, each with an SVG icon.
+  - `.my-review-card__edit` contains the inline edit form (hidden by default).
+  - `.my-reviews__empty` is the centered empty state with a large star icon,
+    message text, and a green CTA button.
+==================
+
+
+================================================================================
+Hide Booking Section & Prevent Duplicate Bookings
+================================================================================
+
+==================
+> models/bookingModel.js (existing)
+> Added: Unique compound index on { tour, user }
+> HOW IT WORKS:
+  - `bookingSchema.index({ tour: 1, user: 1 }, { unique: true })` ensures
+    MongoDB will reject any attempt to create a second booking for the same
+    user + tour combination.
+  - This is the database-level enforcement — even if the UI is bypassed
+    (e.g. via API call), the duplicate booking will be rejected with a
+    MongoDB duplicate key error (E11000).
+  - Works in tandem with the UI-level check for a seamless user experience.
+==================
+
+==================
+> views/tour.pug (existing)
+> Changed: CTA section conditionally hides booking button for booked users
+> HOW IT WORKS:
+  - Uses the `hasBooked` flag already computed in `viewsController.getTour`.
+  - If `user && hasBooked` is true:
+    * Heading changes to "You're going on this tour!"
+    * Text changes to a congratulatory message.
+    * Button becomes "View My Bookings" linking to `/my-tours`.
+    * The `#book-tour` button is NOT rendered, so the Stripe checkout
+      cannot be triggered from the UI.
+  - If the user has NOT booked:
+    * Shows the normal "What are you waiting for?" CTA with the
+      "Book tour now!" button (or "Log in" for anonymous users).
+  - This is purely a UI guard — the model-level unique index provides
+    the real enforcement against duplicates.
+==================
+
+
+================================================================================
+Signup Form — Implementation
+================================================================================
+
+==================
+> views/signup.pug (new)
+> New: Signup page template
+> HOW IT WORKS:
+  - Extends `base.pug` and uses the existing `.login-form` container layout
+    (same as login.pug) for visual consistency.
+  - Form has class `.form--signup` for JS event binding.
+  - Fields: name, email, password, confirm password — all required.
+  - Password fields enforce `minlength='8'` via HTML validation.
+  - Includes an "Already have an account? Log in" link at the bottom
+    pointing to `/login`.
+==================
+
+==================
+> controllers/viewsController.js (existing)
+> Added: getSignupForm handler
+> HOW IT WORKS:
+  - Simple handler that renders `signup.pug` with title 'Create your account'.
+  - No authentication needed — accessible to anonymous users.
+==================
+
+==================
+> routes/viewRoutes.js (existing)
+> Added: GET /signup route
+> HOW IT WORKS:
+  - Maps to `viewsController.getSignupForm`.
+  - Uses `authController.isLoggedIn` middleware (same as login page) so the
+    header knows whether to show user nav or login/signup links.
+==================
+
+==================
+> public/js/login.js (existing)
+> Added: signup function export
+> HOW IT WORKS:
+  - `signup(name, email, password, passwordConfirm)` sends a POST request
+    to `/api/v1/users/signup` with all four fields.
+  - On success → shows a green "Account created successfully!" alert and
+    redirects to the homepage after 1.5s.
+  - On error → shows the server's validation error message (e.g.
+    "Passwords are not the same", "Please provide a valid email").
+  - The existing `authController.signup` handles user creation + welcome
+    email + JWT cookie — no backend changes needed.
+==================
+
+==================
+> public/js/index.js (existing)
+> Added: signup import + form handler
+> HOW IT WORKS:
+  - Imports `signup` from `./login` alongside `login` and `logout`.
+  - Selects `.form--signup` DOM element.
+  - On submit: prevents default, reads name/email/password/passwordConfirm
+    values and calls the `signup()` function.
+==================
+
+==================
+> public/css/style.css (existing)
+> Added: Signup form link styling
+> HOW IT WORKS:
+  - `.form__link-group` centers the "Already have an account?" text.
+  - `.form__link` is styled in Natours green (#55c57a) with hover
+    underline and color shift to darker green (#28b487).
+  - `.form__link-text` is gray (#999) at 1.5rem to visually distinguish
+    it from form fields.
+==================
+
+
+================================================================================
+Nested Booking Routes & Improved Tour Dates
+================================================================================
+
+==================
+> models/tourModel.js (existing)
+> Changed: startDates from [Date] to array of subdocuments
+> HOW IT WORKS:
+  - Old: `startDates: [Date]` — just an array of plain dates.
+  - New: Each startDate is a subdocument with three fields:
+    * `date` (Date, required) — the actual tour start date.
+    * `participants` (Number, default: 0) — current number of bookings.
+    * `soldOut` (Boolean, default: false) — true when fully booked.
+  - Each date now acts as a "tour instance" that tracks availability.
+  - NOTE: After this change, existing data must be re-imported so dates
+    use the new `{ date, participants, soldOut }` format.
+==================
+
+==================
+> models/bookingModel.js (existing)
+> Changed: Added startDate field, updated unique index
+> HOW IT WORKS:
+  - New `startDate` field (Date, required) stores which specific tour date
+    the user booked.
+  - Unique index changed from `{ tour, user }` to `{ tour, user, startDate }`.
+  - This allows a user to book the SAME tour on DIFFERENT dates, but prevents
+    booking the same tour+date combination twice.
+==================
+
+==================
+> controllers/bookingController.js (existing)
+> Added: setTourUserIds + checkAvailability middlewares, AppError import
+> HOW IT WORKS:
+  - `setTourUserIds`: Auto-populates `req.body.tour` from `req.params.tourId`
+    and `req.body.user` from `req.user.id` for nested route support.
+  - `checkAvailability`: Runs BEFORE `createBooking`:
+    1. Validates that `tour` and `startDate` are provided.
+    2. Loads the tour and finds the matching date subdocument using
+       `tour.startDates.find(d => d.date.toISOString() === ...)`.
+    3. If the date doesn't exist on the tour → 400 error.
+    4. If `dateObj.soldOut === true` → 400 error ("fully booked").
+    5. Increments `dateObj.participants += 1`.
+    6. If `participants >= maxGroupSize` → sets `soldOut = true`.
+    7. Saves the tour with `{ validateModifiedOnly: true }` to avoid
+       triggering unrelated validations.
+    8. Calls `next()` to proceed to `createBooking`.
+  - This ensures real-time availability tracking at the database level.
+==================
+
+==================
+> routes/bookingRoutes.js (existing)
+> Changed: Enabled mergeParams, added middlewares to POST chain
+> HOW IT WORKS:
+  - `express.Router({ mergeParams: true })` allows the router to receive
+    `tourId` and `userId` from parent routes.
+  - POST '/' chain is now:
+    1. `setTourUserIds` — auto-set IDs from URL params
+    2. `checkAvailability` — validate date + check capacity
+    3. `createBooking` — factory handler creates the booking
+==================
+
+==================
+> routes/tourRoutes.js (existing)
+> Added: Nested booking route delegation
+> HOW IT WORKS:
+  - `router.use('/:tourId/bookings', bookingRouter)` delegates to the
+    booking router, passing tourId via mergeParams.
+  - GET /api/v1/tours/:tourId/bookings → lists all bookings for a tour.
+  - POST /api/v1/tours/:tourId/bookings → creates a booking for the tour.
+==================
+
+==================
+> routes/userRoutes.js (existing)
+> Added: Nested booking route delegation
+> HOW IT WORKS:
+  - `router.use('/:userId/bookings', bookingRouter)` delegates to the
+    booking router, passing userId via mergeParams.
+  - GET /api/v1/users/:userId/bookings → lists all bookings for a user.
+  - Placed BEFORE the signup/login routes so it catches the nested path.
+==================
+
+==================
+> controllers/handlerFactory.js (existing)
+> Changed: getAll filter now supports userId
+> HOW IT WORKS:
+  - Added: `if (req.params.userId) filter = { ...filter, user: req.params.userId }`
+  - This enables the nested user bookings route to filter correctly.
+  - Uses spread operator to merge with any existing tourId filter.
+==================
+
+==================
+> views/tour.pug + overview.pug (existing)
+> Changed: Updated date access from startDates[0] to startDates[0].date
+> HOW IT WORKS:
+  - Since startDates are now subdocuments, the actual date value lives
+    in the `.date` property instead of directly on the array element.
+  - Both templates updated: `tour.startDates[0].date.toLocaleString(...)`.
+==================
+
+
+================================================================================
+Like Tour / Favourite Functionality
+================================================================================
+
+==================
+> models/favouriteModel.js (new)
+> New: Favourite model
+> HOW IT WORKS:
+  - Schema with `tour` (ObjectId ref Tour) and `user` (ObjectId ref User).
+  - Unique compound index `{ tour, user }` prevents duplicate favourites.
+  - Pre-find populate hook loads full tour data (name, slug, imageCover, etc.)
+    for the favourites page.
+==================
+
+==================
+> controllers/favouriteController.js (new)
+> New: Favourite controller
+> HOW IT WORKS:
+  - `toggleFavourite`: If favourite exists → delete it. If not → create it.
+    Returns `{ favourited: true/false }` so the UI can toggle the heart.
+  - `isFavourited`: Checks if the current user has favourited a tour.
+  - `getMyFavourites`: Returns all tours the user has favourited.
+  - `getAllFavourites` / `deleteFavourite`: Admin factory methods.
+==================
+
+==================
+> routes/favouriteRoutes.js (new)
+> New: Favourite API routes
+> HOW IT WORKS:
+  - All routes are protected (require authentication).
+  - POST /toggle/:tourId — toggle favourite on/off.
+  - GET /check/:tourId — check if favourited.
+  - GET /my-favourites — list user's favourite tours.
+  - Admin-only: GET / (all favourites), DELETE /:id.
+==================
+
+==================
+> app.js (existing)
+> Added: favouriteRouter import and mount at /api/v1/favourites
+==================
+
+==================
+> public/js/favourite.js (new)
+> New: Client-side favourite toggle
+> HOW IT WORKS:
+  - `toggleFavourite(tourId, heartEl)` sends POST to the toggle endpoint.
+  - On success, toggles CSS classes `heart--active` / `heart--inactive`
+    on the heart element for instant visual feedback.
+==================
+
+==================
+> views/overview.pug (existing)
+> Added: Heart button overlay on tour cards
+> HOW IT WORKS:
+  - Only rendered if `user` exists (logged in).
+  - Uses `favouriteIds` array from controller to set initial state.
+  - Button has `data-tour-id` for JS event binding.
+==================
+
+==================
+> views/tour.pug (existing)
+> Added: Heart button on tour detail page hero section
+> HOW IT WORKS:
+  - Positioned at top-right of the hero image (larger variant).
+  - Uses `isFavourited` flag from controller for initial state.
+==================
+
+==================
+> controllers/viewsController.js (existing)
+> Added: getMyFavourites handler + favouriteIds on overview
+> HOW IT WORKS:
+  - `getOverview`: Queries user's favourites to build `favouriteIds` array.
+  - `getTour`: Checks if user has favourited the current tour.
+  - `getMyFavourites`: Fetches favourites, extracts tour objects,
+    renders the overview template with "My Favourite Tours" title.
+==================
+
+==================
+> routes/viewRoutes.js (existing)
+> Added: GET /my-favourites route (protected)
+==================
+
+==================
+> views/account.pug (existing)
+> Added: "My favourites" sidebar link with heart icon
+==================
+
+==================
+> public/js/index.js (existing)
+> Added: favourite import + heart button click handlers
+> HOW IT WORKS:
+  - Selects all `.heart-btn` elements.
+  - On click, calls `toggleFavourite()` with the tour ID and element ref.
+  - Prevents event propagation so card links aren't triggered.
+==================
+
+==================
+> public/css/style.css (existing)
+> Added: ~80 lines of heart button CSS
+> HOW IT WORKS:
+  - `.heart-btn` is a circular white overlay with box-shadow.
+  - `.heart--inactive` has outline-only heart (stroke, no fill).
+  - `.heart--active` fills the heart red (#eb2f64).
+  - Hover scales up 1.15x, active scales down 0.95x.
+  - `.heart-btn--detail` is larger for the tour detail page.
+==================
+
+
+================================================================================
+Admin Manage Pages (Tours, Users, Reviews, Bookings)
+================================================================================
+
+==================
+> views/manageTours.pug (new)
+> New: Admin Manage Tours page
+> HOW IT WORKS:
+  - Tabular layout with columns: Image, Name, Duration, Price, Difficulty,
+    Rating, Actions (View link + Delete button).
+  - Difficulty shown as color-coded badges (green/yellow/red).
+  - View links to the tour detail page.
+  - Delete triggers API call via `.btn-delete-resource`.
+==================
+
+==================
+> views/manageUsers.pug (new)
+> New: Admin Manage Users page
+> HOW IT WORKS:
+  - Columns: Photo (circular), Name, Email, Role badge, Delete button.
+  - Role badges: admin (green gradient), guide/lead-guide (blue), user (gray).
+==================
+
+==================
+> views/manageReviews.pug (new)
+> New: Admin Manage Reviews page
+> HOW IT WORKS:
+  - Columns: Tour name, User name, Star rating (visual ★ icons), Review
+    text (truncated to 80 chars), Delete button.
+  - Handles deleted tours/users gracefully.
+==================
+
+==================
+> views/manageBookings.pug (new)
+> New: Admin Manage Bookings page
+> HOW IT WORKS:
+  - Columns: Tour name, User name, Price, Date, Paid status (green ✓ / red ✗
+    badge), Delete button.
+==================
+
+==================
+> controllers/viewsController.js (existing)
+> Added: getManageTours, getManageUsers, getManageReviews, getManageBookings
+> HOW IT WORKS:
+  - Each handler queries the respective Model.find() and renders
+    the corresponding manage template.
+  - getManageReviews also populates the tour name.
+==================
+
+==================
+> routes/viewRoutes.js (existing)
+> Added: 4 admin routes (/manage-tours, /manage-users, etc.)
+> HOW IT WORKS:
+  - All protected + restricted to 'admin' role.
+  - Maps to the corresponding viewsController handlers.
+==================
+
+==================
+> views/account.pug (existing)
+> Changed: Admin sidebar links now point to actual manage routes
+> HOW IT WORKS:
+  - Changed from '#' to /manage-tours, /manage-users, /manage-reviews,
+    /manage-bookings. Also fixed typo "bookingd" → "bookings".
+==================
+
+==================
+> public/js/admin.js (new)
+> New: Admin delete resource module
+> HOW IT WORKS:
+  - `deleteResource(resource, id)` sends DELETE to `/api/v1/${resource}/${id}`.
+  - On success, shows alert and reloads the page.
+  - Uses the existing CRUD API routes for each resource.
+==================
+
+==================
+> public/js/index.js (existing)
+> Added: Admin delete button handlers
+> HOW IT WORKS:
+  - Selects all `.btn-delete-resource` elements.
+  - On click, reads `data-resource` (e.g. 'tours') and `data-id`.
+  - Shows confirm dialog. If confirmed, fades the row (opacity: 0.5)
+    and calls `deleteResource()`.
+==================
+
+==================
+> public/css/style.css (existing)
+> Added: ~250 lines of admin manage page CSS
+> HOW IT WORKS:
+  - `.manage-page` is a max-width container with padding.
+  - `.manage-table` uses flex-based rows with a green gradient header.
+  - Rows have hover highlight and separator borders.
+  - `.manage-badge--*` variants for difficulty, role, and paid status.
+  - `.manage-btn--view` (green) and `.manage-btn--delete` (red) action
+    buttons with SVG icons and hover color inversion.
+  - Responsive: wraps cells on narrow screens.
+==================
+
+
+================================================================================
+Forgot / Reset Password — Website Implementation
+================================================================================
+
+==================
+> views/login.pug (existing)
+> Changed: Added "Forgot your password?" and "Sign up" links
+> HOW IT WORKS:
+  - "Forgot your password?" links to `/forgot-password`.
+  - "Don't have an account? Sign up" links to `/signup`.
+  - Both use the existing `.form__link-group` / `.form__link` CSS.
+==================
+
+==================
+> views/forgotPassword.pug (new)
+> New: Forgot password page
+> HOW IT WORKS:
+  - Heading: "Forgot your password?"
+  - Description paragraph explaining the flow.
+  - Single email input field.
+  - "Send reset link" button with loading state ("Sending...").
+  - "← Back to login" link at the bottom.
+  - Form class `.form--forgot-password` for JS binding.
+==================
+
+==================
+> views/resetPassword.pug (new)
+> New: Reset password page
+> HOW IT WORKS:
+  - Heading: "Set your new password".
+  - Two password fields: New password + Confirm new password (minlength 8).
+  - "Reset password" button with loading state ("Resetting...").
+  - The token from the URL is passed as `data-token` attribute on the form
+    so client-side JS can include it in the API call.
+  - Form class `.form--reset-password` for JS binding.
+==================
+
+==================
+> controllers/viewsController.js (existing)
+> Added: getForgotPasswordForm + getResetPasswordForm handlers
+> HOW IT WORKS:
+  - `getForgotPasswordForm`: Renders `forgotPassword.pug`.
+  - `getResetPasswordForm`: Renders `resetPassword.pug` with the token
+    from `req.params.token` passed as a template variable.
+==================
+
+==================
+> routes/viewRoutes.js (existing)
+> Added: GET /forgot-password and GET /reset-password/:token
+> HOW IT WORKS:
+  - `/forgot-password` → renders the email input form.
+  - `/reset-password/:token` → renders the new password form.
+  - Neither requires authentication (anonymous users need access).
+==================
+
+==================
+> controllers/authController.js (existing)
+> Changed: Reset URL now points to frontend page
+> HOW IT WORKS:
+  - Old: resetURL = `.../api/v1/users/resetPassword/${resetToken}`
+  - New: resetURL = `.../reset-password/${resetToken}`
+  - The email now sends users to the frontend form instead of a raw
+    API endpoint, providing a proper UI experience.
+==================
+
+==================
+> public/js/login.js (existing)
+> Added: forgotPassword + resetPassword functions
+> HOW IT WORKS:
+  - `forgotPassword(email)`: POST to `/api/v1/users/forgotPassword`.
+    On success → shows "Password reset link sent to your email!" alert.
+  - `resetPassword(password, passwordConfirm, token)`: PATCH to
+    `/api/v1/users/resetPassword/${token}`. On success → shows alert
+    and redirects to homepage (user is auto-logged in via JWT cookie).
+==================
+
+==================
+> public/js/index.js (existing)
+> Added: forgotPassword/resetPassword imports + form handlers
+> HOW IT WORKS:
+  - `.form--forgot-password` submit: reads email, calls forgotPassword().
+    Button shows "Sending..." during the request.
+  - `.form--reset-password` submit: reads passwords + token from
+    data attribute, calls resetPassword(). Button shows "Resetting...".
+==================
+
+==================
+> public/css/style.css (existing)
+> Added: .form__description style
+> HOW IT WORKS:
+  - Gray (#999) text at 1.5rem with 1.7 line-height.
+  - Used on the forgot password page to explain the reset flow.
+==================
+
+==================
+> utils/email.js (existing)
+> Changed: Email transport now uses SendGrid in both dev and production
+> HOW IT WORKS:
+  - Old: Checked `NODE_ENV === 'production'` → only used SendGrid in prod.
+    In development, all emails went to Mailtrap (sandbox) and never
+    reached real inboxes.
+  - New: Checks if `SENDGRID_PASSWORD` exists → uses SendGrid regardless
+    of NODE_ENV. Falls back to Mailtrap only if SendGrid is not configured.
+  - This means password reset emails now reach the user's actual inbox
+    even during local development.
+==================

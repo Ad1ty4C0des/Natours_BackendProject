@@ -17,6 +17,10 @@ block content
     .header__hero
       .header__hero-overlay &nbsp;
       img.header__hero-img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+    if user
+      button.heart-btn.heart-btn--detail(data-tour-id=`${tour._id}`, class=isFavourited ? 'heart--active' : 'heart--inactive', title=isFavourited ? 'Remove from favourites' : 'Add to favourites')
+        svg.heart-icon
+          use(xlink:href=`/img/icons.svg#icon-heart`)
 
     .heading-box
       h1.heading-primary
@@ -37,7 +41,7 @@ block content
         .overview-box__group
           h2.heading-secondary.ma-bt-lg Quick facts
 
-          - const date = tour.startDates[0].toLocaleString('en-us', {month: 'long', year: 'numeric'})
+          - const date = tour.startDates && tour.startDates[0] ? tour.startDates[0].date.toLocaleString('en-us', {month: 'long', year: 'numeric'}) : 'TBD'
           +overviewBox('Next date', date, 'calendar')
           +overviewBox('Difficulty', tour.difficulty, 'trending-up')
           +overviewBox('Participants', `${tour.maxGroupSize} people`, 'user')
@@ -75,17 +79,76 @@ block content
       each review in tour.reviews
         +reviewCard(review)
 
+  //- Review form — only shown for users who have booked this tour
+  if user && hasBooked
+    section.section-review-form
+      .review-form-container
+        if hasReviewed
+          .review-form__done
+            svg.review-form__done-icon
+              use(xlink:href='/img/icons.svg#icon-check')
+            h2.heading-secondary.ma-bt-lg Thanks for your review!
+            p.review-form__done-text You have already submitted a review for this tour. You can see it in the reviews section above.
+        else
+          h2.heading-secondary.ma-bt-lg Share your experience
+          p.review-form__subtitle Tell us about your adventure — your review helps other travelers!
+          form.form.form--review#review-form(data-tour-id=`${tour.id}`)
+            .form__group.form__rating-group
+              label.form__label Rating
+              .form__stars#rating-stars
+                each star in [1, 2, 3, 4, 5]
+                  svg.form__star.form__star--inactive(data-value=`${star}`)
+                    use(xlink:href='/img/icons.svg#icon-star')
+              input#review-rating(type='hidden' name='rating' value='0')
+
+            .form__group
+              label.form__label(for='review-text') Your Review
+              textarea.form__input.form__textarea#review-text(
+                placeholder='Write your review here... What did you love about this tour?'
+                rows='5'
+                required
+              )
+
+            .form__group
+              button.btn.btn--green.btn--submit-review(type='submit') Submit Review
+
   section.section-cta
     .cta
       .cta__img.cta__img--logo
         img(src='/img/logo-white.png', alt='Natours logo')
-      img.cta__img.cta__img--1(src=`/img/tours/${tour.images[1]}`, alt='Tour picture')
-      img.cta__img.cta__img--2(src=`/img/tours/${tour.images[2]}`, alt='Tour picture')
+      if tour.images && tour.images[1]
+        img.cta__img.cta__img--1(src=`/img/tours/${tour.images[1]}`, alt='Tour picture')
+      if tour.images && tour.images[2]
+        img.cta__img.cta__img--2(src=`/img/tours/${tour.images[2]}`, alt='Tour picture')
       .cta__content
-        h2.heading-secondary What are you waiting for?
-        p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
-
-        if user
-          button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
+        if user && hasBooked
+          h2.heading-secondary You're going on this tour!
+          p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. You've already booked — get ready!`
+          a.btn.btn--green.span-all-rows(href='/my-tours') View My Bookings
         else
-          a.btn.btn--green.span-all-rows(href='/login') Log in to book tour
+          h2.heading-secondary What are you waiting for?
+          p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
+          if user
+            - const datesData = JSON.stringify(tour.startDates.map(d => ({ date: d.date.toISOString(), participants: d.participants, soldOut: d.soldOut })))
+            .cta__date-picker
+              .cta__field
+                label.cta__date-label(for='tour-date') Select a start date
+                select.cta__date-select#tour-date(data-dates=datesData, data-max-group=tour.maxGroupSize)
+                  option(value='') — Choose a date —
+                  each dateObj in tour.startDates
+                    - const d = dateObj.date
+                    - const formatted = d.toLocaleString('en-us', {weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'})
+                    if dateObj.soldOut
+                      option(value=d.toISOString(), disabled) #{formatted} — SOLD OUT
+                    else
+                      - const spotsLeft = tour.maxGroupSize - dateObj.participants
+                      option(value=d.toISOString()) #{formatted} (#{spotsLeft} spots left)
+              .cta__field
+                label.cta__date-label(for='num-people') Number of people
+                .cta__people-input
+                  button.cta__people-btn#people-minus(type='button') −
+                  input.cta__people-value#num-people(type='number', value='1', min='1', max='1', readonly)
+                  button.cta__people-btn#people-plus(type='button') +
+            button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
+          else
+            a.btn.btn--green.span-all-rows(href='/login') Log in to book tour

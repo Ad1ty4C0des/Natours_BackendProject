@@ -1,0 +1,37 @@
+extends base
+
+block content
+  main.main
+    .manage-page
+      .manage-header
+        h2.heading-secondary Manage Users
+        p.manage-subtitle= `${users.length} users total`
+
+      if users.length === 0
+        .manage-empty
+          svg.manage-empty__icon
+            use(xlink:href='/img/icons.svg#icon-users')
+          p.manage-empty__text No users found.
+
+      else
+        .manage-table
+          .manage-table__head
+            .manage-table__row
+              span.manage-table__cell.manage-table__cell--header Photo
+              span.manage-table__cell.manage-table__cell--header.manage-table__cell--grow Name
+              span.manage-table__cell.manage-table__cell--header Email
+              span.manage-table__cell.manage-table__cell--header Role
+              span.manage-table__cell.manage-table__cell--header Actions
+
+          .manage-table__body
+            each u in users
+              .manage-table__row(data-id=`${u._id}`)
+                span.manage-table__cell
+                  img.manage-table__img.manage-table__img--round(src=`/img/users/${u.photo}`, alt=`${u.name}`)
+                span.manage-table__cell.manage-table__cell--grow.manage-table__cell--name= u.name
+                span.manage-table__cell.manage-table__cell--email= u.email
+                span.manage-table__cell
+                  span.manage-badge(class=`manage-badge--${u.role}`)= u.role
+                span.manage-table__cell.manage-table__cell--actions
+                  button.manage-btn.manage-btn--delete.btn-delete-resource(data-resource='users', data-id=`${u._id}`, title='Delete')
+                    svg: use(xlink:href='/img/icons.svg#icon-trash-2')

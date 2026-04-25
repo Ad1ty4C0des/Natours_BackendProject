@@ -1,0 +1,78 @@
+extends base
+
+mixin navItem(link, text, icon, active)
+  li(class=active ? 'side-nav--active' : '')
+    a(href=`${link}`)
+      svg
+        use(xlink:href=`img/icons.svg#icon-${icon}`)
+      | #{text}
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          +navItem('/me', 'Settings', 'settings')
+          +navItem('/my-tours', 'My bookings', 'briefcase')
+          +navItem('/my-reviews', 'My reviews', 'star')
+          +navItem('/my-favourites', 'My favourites', 'heart')
+          +navItem('/billing', 'Billing', 'credit-card', true)
+
+        - if(user.role === 'admin')
+          .admin-nav
+            h5.admin-nav__heading Admin
+            ul.side-nav
+              +navItem('/manage-tours', 'Manage tours', 'map')
+              +navItem('/manage-users', 'Manage users', 'users')
+              +navItem('/manage-reviews', 'Manage reviews', 'star')
+              +navItem('/manage-bookings', 'Manage bookings', 'briefcase')
+
+      .user-view__content
+        .user-view__form-container
+          h2.heading-secondary.ma-bt-md Billing & Payment History
+
+          if bookings.length === 0
+            .billing__empty
+              svg.billing__empty-icon
+                use(xlink:href='/img/icons.svg#icon-credit-card')
+              p.billing__empty-text No billing history yet. Once you book a tour, your payment details will appear here.
+              a.btn.btn--green(href='/') Browse Tours
+
+          else
+            .billing__summary
+              .billing__summary-card
+                svg.billing__summary-icon
+                  use(xlink:href='/img/icons.svg#icon-briefcase')
+                .billing__summary-info
+                  span.billing__summary-value= bookings.length
+                  span.billing__summary-label Total Bookings
+              .billing__summary-card
+                svg.billing__summary-icon
+                  use(xlink:href='/img/icons.svg#icon-dollar-sign')
+                .billing__summary-info
+                  span.billing__summary-value= `$${totalSpent.toLocaleString()}`
+                  span.billing__summary-label Total Spent
+
+            .billing__table
+              .billing__table-header
+                span.billing__col.billing__col--tour Tour
+                span.billing__col.billing__col--date Date Booked
+                span.billing__col.billing__col--people People
+                span.billing__col.billing__col--amount Amount
+                span.billing__col.billing__col--status Status
+
+              each booking in bookings
+                .billing__table-row
+                  span.billing__col.billing__col--tour
+                    if booking.tour
+                      = booking.tour.name
+                    else
+                      em (Deleted Tour)
+                  span.billing__col.billing__col--date= booking.createdAt.toLocaleDateString('en-us', {month: 'short', day: 'numeric', year: 'numeric'})
+                  span.billing__col.billing__col--people= booking.numPeople || 1
+                  span.billing__col.billing__col--amount= `$${booking.price.toLocaleString()}`
+                  span.billing__col.billing__col--status
+                    if booking.paid
+                      span.billing__badge.billing__badge--paid Paid
+                    else
+                      span.billing__badge.billing__badge--pending Pending
