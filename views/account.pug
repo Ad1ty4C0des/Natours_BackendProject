@@ -1,65 +1,93 @@
 extends base
 
-mixin navItem(link, text, icon, active)
-  li(class=active ? 'side-nav--active' : '')
-    a(href=`${link}`)
-      svg
-        use(xlink:href=`img/icons.svg#icon-${icon}`)
-      | #{text}
-
 block content
-  main.main
-    .user-view
-      nav.user-view__menu
-        ul.side-nav
-          +navItem('/me', 'Settings', 'settings', true)
-          +navItem('/my-tours', 'My bookings', 'briefcase')
-          +navItem('/my-reviews', 'My reviews', 'star')
-          +navItem('/my-favourites', 'My favourites', 'heart')
-          +navItem('/billing', 'Billing', 'credit-card')
+  div(class='max-w-7xl mx-auto flex min-h-[calc(100vh-80px)] pt-20')
+    //- Sidebar
+    aside(class='hidden lg:flex flex-col h-auto py-8 space-y-2 bg-white dark:bg-zinc-900 w-64 border-r border-zinc-200 dark:border-zinc-800 font-serif text-sm font-medium')
+      div.px-6.mb-8
+        p(class='text-lg font-black text-zinc-900 dark:text-white') Account Central
+        p(class='text-xs text-zinc-500 dark:text-zinc-400 font-sans uppercase tracking-widest mt-1') Natours Member
 
-        - if(user.role === 'admin')
-          .admin-nav
-            h5.admin-nav__heading Admin
-            ul.side-nav
-              +navItem('/manage-tours', 'Manage tours', 'map')
-              +navItem('/manage-users', 'Manage users', 'users')
-              +navItem('/manage-reviews', 'Manage reviews', 'star')
-              +navItem('/manage-bookings', 'Manage bookings', 'briefcase')
+      nav(class='flex-1 px-3 space-y-1')
+        a(class='nav__el flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-r-4 border-emerald-600 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/me')
+          span.material-symbols-outlined person
+          | Settings
+        a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/my-tours')
+          span.material-symbols-outlined luggage
+          | My Bookings
+        a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/my-reviews')
+          span.material-symbols-outlined rate_review
+          | My Reviews
+        a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/my-favourites')
+          span.material-symbols-outlined favorite
+          | Favourites
 
-      .user-view__content
-        .user-view__form-container
-          h2.heading-secondary.ma-bt-md Your account settings
-          //- Without API
-          //- form.form.form-user-data(action='/submit-user-data' method='POST' enctype='multipart/form-data')
+        if user.role === 'admin' || user.role === 'lead-guide'
+          div(class='border-t border-zinc-200 my-4 mx-4')
+          a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 transition-all hover:translate-x-1 no-underline' href='/manage-tours')
+            span.material-symbols-outlined map
+            | Manage Tours
+          a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 transition-all hover:translate-x-1 no-underline' href='/manage-users')
+            span.material-symbols-outlined group
+            | Manage Users
+          a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 transition-all hover:translate-x-1 no-underline' href='/manage-reviews')
+            span.material-symbols-outlined reviews
+            | Manage Reviews
 
-          //- WITH API
-          form.form.form-user-data
-            .form__group
-              label.form__label(for='name') Name
-              input#name.form__input(type='text', value=`${user.name}`, required, name='name')
-            .form__group.ma-bt-md
-              label.form__label(for='email') Email address
-              input#email.form__input(type='email', value=`${user.email}`, required, name='email')
-            .form__group.form__photo-upload
-              img.form__user-photo(src=`/img/users/${user.photo}`, alt='User photo')
-              input.form__upload(type='file', accept='image/*', id='photo', name='photo')
-              label(for='photo') Choose new photo
+    //- Main Content
+    main(class='flex-1 bg-surface-container-low p-margin md:p-section-padding overflow-y-auto')
+      div(class='max-w-4xl mx-auto space-y-10')
+        //- Header
+        div.space-y-2
+          h1(class='text-headline-xl font-headline-xl text-on-surface') Personal Info
+          p(class='text-body-lg font-body-lg text-on-surface-variant max-w-2xl') Manage your expedition identity and preferences.
 
-            .form__group.right
-              button.btn.btn--small.btn--green Save settings
-        .line &nbsp;
-        .user-view__form-container
-          h2.heading-secondary.ma-bt-md Password change
-          form.form.form-user-password
-            .form__group
-              label.form__label(for='password-current') Current password
-              input#password-current.form__input(type='password', placeholder='••••••••', required, minlength='8')
-            .form__group
-              label.form__label(for='password') New password
-              input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')
-            .form__group.ma-bt-lg
-              label.form__label(for='password-confirm') Confirm password
-              input#password-confirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
-            .form__group.right
-              button.btn.btn--small.btn--green.btn--save-password Save password
+        //- Profile Card
+        div(class='grid grid-cols-1 md:grid-cols-3 gap-gutter')
+          div(class='md:col-span-2 bg-white dark:bg-zinc-800 rounded-xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-700 flex items-center gap-6')
+            div.relative.group
+              div(class='h-24 w-24 rounded-full overflow-hidden border-4 border-primary-container/30')
+                img(class='w-full h-full object-cover' src=`/img/users/${user.photo}` alt=`${user.name}`)
+            div
+              h3(class='text-headline-md font-headline-md text-on-surface')= user.name
+              p(class='text-body-md font-body-md text-on-surface-variant')= user.email
+              div(class='mt-2 flex gap-2')
+                span(class='bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-label-sm font-label-sm uppercase')= user.role
+
+        //- Account Details Card
+        section(class='bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-100 dark:border-zinc-700 overflow-hidden')
+          div(class='px-8 py-6 border-b border-zinc-100 dark:border-zinc-700')
+            h2(class='text-headline-md font-headline-md text-on-surface') Account Details
+          div.p-8
+            form(class='form form-user-data grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8')
+              div.space-y-1
+                label(class='text-label-lg font-label-lg text-on-surface-variant uppercase' for='name') Full Name
+                input#name(class='w-full border-b border-zinc-200 dark:border-zinc-600 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent text-on-surface' type='text' value=`${user.name}` required)
+              div.space-y-1
+                label(class='text-label-lg font-label-lg text-on-surface-variant uppercase' for='email') Email Address
+                input#email(class='w-full border-b border-zinc-200 dark:border-zinc-600 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent text-on-surface' type='email' value=`${user.email}` required)
+              div(class='space-y-1 md:col-span-2')
+                label(class='text-label-lg font-label-lg text-on-surface-variant uppercase') Photo
+                div(class='flex items-center gap-4')
+                  img(class='w-12 h-12 rounded-full object-cover' src=`/img/users/${user.photo}` alt='User photo')
+                  input(class='text-body-md file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-container file:text-on-primary-container hover:file:bg-primary-fixed cursor-pointer' type='file' accept='image/*' id='photo' name='photo')
+              div(class='md:col-span-2 flex justify-end')
+                button(class='btn--save-settings bg-primary-container text-on-primary-container font-label-lg px-8 py-3 rounded-lg shadow-sm hover:shadow-md hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer border-none' type='submit') Save Settings
+
+        //- Password Card
+        section(class='bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-100 dark:border-zinc-700 overflow-hidden')
+          div(class='px-8 py-6 border-b border-zinc-100 dark:border-zinc-700')
+            h2(class='text-headline-md font-headline-md text-on-surface') Change Password
+          div.p-8
+            form(class='form form-user-password space-y-8')
+              div.space-y-1
+                label(class='text-label-lg font-label-lg text-on-surface-variant uppercase' for='password-current') Current Password
+                input#password-current(class='w-full border-b border-zinc-200 dark:border-zinc-600 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent text-on-surface' type='password' placeholder='••••••••' required minlength='8')
+              div.space-y-1
+                label(class='text-label-lg font-label-lg text-on-surface-variant uppercase' for='password') New Password
+                input#password(class='w-full border-b border-zinc-200 dark:border-zinc-600 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent text-on-surface' type='password' placeholder='••••••••' required minlength='8')
+              div.space-y-1
+                label(class='text-label-lg font-label-lg text-on-surface-variant uppercase' for='password-confirm') Confirm Password
+                input#password-confirm(class='w-full border-b border-zinc-200 dark:border-zinc-600 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent text-on-surface' type='password' placeholder='••••••••' required minlength='8')
+              div(class='flex justify-end')
+                button(class='btn--save-password bg-secondary text-on-secondary font-label-lg px-8 py-3 rounded-lg shadow-sm hover:shadow-md hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer border-none' type='submit') Update Password

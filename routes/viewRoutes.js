@@ -21,6 +21,9 @@ router.get(
 );
 router.get('/login', authController.isLoggedIn, viewsController.getLoginForm);
 router.get('/signup', authController.isLoggedIn, viewsController.getSignupForm);
+router.get('/about', authController.isLoggedIn, viewsController.getAbout);
+router.get('/careers', authController.isLoggedIn, viewsController.getCareers);
+router.get('/privacy', authController.isLoggedIn, viewsController.getPrivacy);
 router.get('/forgot-password', viewsController.getForgotPasswordForm);
 router.get('/reset-password/:token', viewsController.getResetPasswordForm);
 router.get('/me', authController.protected, viewsController.getAccount);

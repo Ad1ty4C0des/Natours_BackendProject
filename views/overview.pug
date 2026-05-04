@@ -1,63 +1,80 @@
 extends base
 
-block content 
-  main.main 
-    .card-container
+block content
+  main.flex-grow
+    if isHomepage
+      //- Hero Section
+      section#hero(class='relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden')
+        //- Background Image
+        div.absolute.inset-0.z-0
+          img(class='w-full h-full object-cover scale-105' src='/img/hero.jpg' alt='Natours Adventures' style='animation: heroZoom 20s ease-in-out infinite alternate')
+          div(class='absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60')
 
-      if !tours || tours.length === 0
-        .empty-state
-          svg.empty-state__icon
-            use(xlink:href='/img/icons.svg#icon-heart')
-          h2.heading-secondary Nothing here yet!
-          if title === 'My Favourite Tours'
-            p.empty-state__text You haven't added any favourites yet. Explore our tours and tap the heart to save your favourites!
-          else if title === 'My Tours'
-            p.empty-state__text You haven't booked any tours yet. Start your adventure today!
-          else
-            p.empty-state__text No tours to display right now.
-          a.btn.btn--green(href='/') Browse Tours
+        //- Hero Content
+        div(class='relative z-10 text-center text-white px-6 max-w-4xl mx-auto')
+          p(class='font-label-lg uppercase tracking-[0.3em] text-emerald-300 mb-6 text-sm' style='animation: fadeInUp 0.8s ease-out 0.2s both') Wilderness Elite Collection
+          h1(class='text-[48px] md:text-[72px] lg:text-[88px] font-bold uppercase leading-[0.95] mb-8 font-serif' style='text-shadow: 0 4px 30px rgba(0,0,0,0.5); animation: fadeInUp 0.8s ease-out 0.4s both')
+            | Explore the
+            br
+            span(class='text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-green-400') Extraordinary
+          p(class='text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-12 leading-relaxed font-light' style='animation: fadeInUp 0.8s ease-out 0.6s both') Hand-crafted adventures in the world's most breathtaking destinations. From alpine peaks to ocean depths — find your next story.
+          div(class='flex flex-col sm:flex-row items-center justify-center gap-4' style='animation: fadeInUp 0.8s ease-out 0.8s both')
+            a(class='px-10 py-4 bg-gradient-to-r from-emerald-600 to-green-500 text-white font-label-lg uppercase tracking-widest rounded-full shadow-lg hover:shadow-emerald-500/30 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 no-underline' href='#tours') Discover Tours
+            a(class='px-10 py-4 border-2 border-white/30 text-white font-label-lg uppercase tracking-widest rounded-full hover:bg-white/10 hover:-translate-y-1 transition-all duration-300 no-underline backdrop-blur-sm' href='/about') Our Story
 
-      each tour in tours
-        .card
-          .card__header
-            .card__picture
-              .card__picture-overlay &nbsp;
-              img.card__picture-img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
-            if user
-              - const isFav = favouriteIds && favouriteIds.includes(tour._id.toString())
-              button.heart-btn(data-tour-id=`${tour._id}`, class=isFav ? 'heart--active' : 'heart--inactive', title=isFav ? 'Remove from favourites' : 'Add to favourites')
-                svg.heart-icon
-                  use(xlink:href=`/img/icons.svg#icon-heart`)
-            h3.heading-tertirary
-              span= tour.name
+        //- Scroll Indicator
+        div(class='absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2' style='animation: fadeInUp 0.8s ease-out 1s both')
+          span(class='text-white/50 text-xs uppercase tracking-widest font-label-sm') Scroll
+          div(class='w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2')
+            div(class='w-1.5 h-1.5 bg-white rounded-full' style='animation: scrollBounce 1.5s ease-in-out infinite')
 
-          .card__details
-            h4.card__sub-heading= `${tour.difficulty} ${tour.duration}-day tour`
-            p.card__text= tour.summary
-            .card__data
-              svg.card__icon
-                use(xlink:href='/img/icons.svg#icon-map-pin')
-              span= tour.startLocation.description
-            .card__data
-              svg.card__icon
-                use(xlink:href='/img/icons.svg#icon-calendar')
-              span= tour.startDates && tour.startDates[0] ? tour.startDates[0].date.toLocaleString('en-us', {month: 'long', year: 'numeric'}) : 'TBD'
-            .card__data
-              svg.card__icon
-                use(xlink:href='/img/icons.svg#icon-flag')
-              span= `${tour.locations.length} stops`
-            .card__data
-              svg.card__icon
-                use(xlink:href='/img/icons.svg#icon-user')
-              span= `${tour.maxGroupSize} people`
+      //- Stats Bar
+      section(class='bg-surface-container-lowest dark:bg-zinc-900 border-b border-outline-variant dark:border-zinc-800')
+        div(class='max-w-[1280px] mx-auto px-8 py-8 grid grid-cols-3 gap-8 text-center')
+          div
+            p(class='text-3xl font-bold text-primary mb-1')= `${tours.length}+`
+            p(class='text-on-surface-variant font-label-sm uppercase tracking-widest') Curated Tours
+          div
+            p(class='text-3xl font-bold text-primary mb-1') 15+
+            p(class='text-on-surface-variant font-label-sm uppercase tracking-widest') Destinations
+          div
+            p(class='text-3xl font-bold text-primary mb-1') 2.5k+
+            p(class='text-on-surface-variant font-label-sm uppercase tracking-widest') Happy Travelers
 
-          .card__footer
-            p
-              span.card__footer-value= `$${tour.price}`
-              | 
-              span.card__footer-text per person
-            p.card__ratings
-              span.card__footer-value= tour.ratingAverage
-              | 
-              span.card__footer-text= `rating (${tour.ratingQuantity})`
-            a.btn.btn--green.btn--small(href=`/tour/${tour.slug}`) Details
+    //- Tour Grid Section
+    section#tours(class=`py-section-padding px-8 max-w-[1280px] mx-auto ${isHomepage ? '' : 'pt-28'}`)
+      div.mb-16.text-center
+        span(class='text-primary font-label-lg uppercase tracking-[0.2em] mb-4 block')= isHomepage ? 'Our Curated Experiences' : 'Your Booked Adventures'
+        h2(class='font-headline-lg text-headline-lg text-on-surface')= isHomepage ? 'Most Popular Tours' : title
+
+      div(class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter')
+        each tour in tours
+          a(class='bg-surface-container-lowest rounded-xl overflow-hidden custom-shadow group transition-all duration-300 hover:-translate-y-2 no-underline flex flex-col' href=`/tour/${tour.slug}`)
+            div(class='relative h-64 overflow-hidden')
+              img(class='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500' src=`/img/tours/${tour.imageCover}` alt=`${tour.name}`)
+              div(class='absolute bottom-0 right-0 glass-panel px-6 py-3 m-4 rounded-lg')
+                span.text-primary.font-bold= `$${tour.price}`
+              if user
+                button(class=`heart-btn absolute top-3 left-3 z-20 bg-white/85 backdrop-blur-sm border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all shadow-md hover:scale-110 ${favouriteIds && favouriteIds.includes(tour.id) ? 'heart--active' : 'heart--inactive'}` data-tour-id=`${tour.id}`)
+                  svg(class='w-5 h-5 heart-icon' viewBox='0 0 24 24' fill='currentColor' stroke='currentColor' stroke-width='2')
+                    path(d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z')
+            div(class='p-8 flex-1 flex flex-col')
+              div(class='flex justify-between items-start mb-4')
+                h3(class='font-headline-md text-headline-md text-on-surface')= tour.name
+                span(class=`${tour.difficulty === 'easy' ? 'bg-primary-fixed text-on-primary-fixed-variant' : tour.difficulty === 'medium' ? 'bg-secondary-fixed text-on-secondary-fixed-variant' : 'bg-error-container text-on-error-container'} px-3 py-1 rounded-full text-label-sm uppercase font-bold`)= tour.difficulty
+              p(class='text-on-surface-variant font-body-md mb-6 line-clamp-2')= tour.summary
+              div(class='grid grid-cols-2 gap-y-4 mb-8')
+                div(class='flex items-center gap-2 text-on-surface-variant')
+                  span(class='material-symbols-outlined text-primary text-[20px]') schedule
+                  span.font-label-sm= `${tour.duration}-day tour`
+                div(class='flex items-center gap-2 text-on-surface-variant')
+                  span(class='material-symbols-outlined text-primary text-[20px]') location_on
+                  span.font-label-sm= tour.startLocation ? tour.startLocation.description : 'TBD'
+                div(class='flex items-center gap-2 text-on-surface-variant')
+                  span(class='material-symbols-outlined text-primary text-[20px]') calendar_month
+                  span.font-label-sm= tour.startDates && tour.startDates.length > 0 ? new Date(tour.startDates[0].date || tour.startDates[0]).toLocaleDateString('en-us', {month: 'short', year: 'numeric'}) : 'TBD'
+                div(class='flex items-center gap-2 text-on-surface-variant')
+                  span(class='material-symbols-outlined text-primary text-[20px]') group
+                  span.font-label-sm= `Max ${tour.maxGroupSize}`
+              div(class='mt-auto w-full py-4 border border-primary-container text-primary font-label-lg uppercase tracking-widest rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors text-center')
+                | View Details

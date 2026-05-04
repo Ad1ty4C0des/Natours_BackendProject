@@ -1,95 +1,95 @@
 extends base
 
-mixin navItem(link, text, icon, active)
-  li(class=active ? 'side-nav--active' : '')
-    a(href=`${link}`)
-      svg
-        use(xlink:href=`img/icons.svg#icon-${icon}`)
-      | #{text}
-
 block content
-  main.main
-    .user-view
-      nav.user-view__menu
-        ul.side-nav
-          +navItem('/me', 'Settings', 'settings')
-          +navItem('/my-tours', 'My bookings', 'briefcase')
-          +navItem('/my-reviews', 'My reviews', 'star', true)
-          +navItem('/my-favourites', 'My favourites', 'heart')
-          +navItem('/billing', 'Billing', 'credit-card')
+  div(class='max-w-7xl mx-auto flex min-h-[calc(100vh-80px)] pt-20')
+    //- Sidebar
+    aside(class='hidden lg:flex flex-col h-auto py-8 space-y-2 bg-white dark:bg-zinc-900 w-64 border-r border-zinc-200 dark:border-zinc-800 font-serif text-sm font-medium')
+      div.px-6.mb-8
+        p(class='text-lg font-black text-zinc-900 dark:text-white') Account Central
+        p(class='text-xs text-zinc-500 dark:text-zinc-400 font-sans uppercase tracking-widest mt-1') Natours Member
 
-        - if(user.role === 'admin')
-          .admin-nav
-            h5.admin-nav__heading Admin
-            ul.side-nav
-              +navItem('/manage-tours', 'Manage tours', 'map')
-              +navItem('/manage-users', 'Manage users', 'users')
-              +navItem('/manage-reviews', 'Manage reviews', 'star')
-              +navItem('/manage-bookings', 'Manage bookings', 'briefcase')
+      nav(class='flex-1 px-3 space-y-1')
+        a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/me')
+          span.material-symbols-outlined person
+          | Settings
+        a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/my-tours')
+          span.material-symbols-outlined luggage
+          | My Bookings
+        a(class='nav__el flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-r-4 border-emerald-600 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/my-reviews')
+          span.material-symbols-outlined rate_review
+          | My Reviews
+        a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1 no-underline' href='/my-favourites')
+          span.material-symbols-outlined favorite
+          | Favourites
 
-      .user-view__content
-        .user-view__form-container
-          h2.heading-secondary.ma-bt-md My Reviews
+        if user.role === 'admin' || user.role === 'lead-guide'
+          div(class='border-t border-zinc-200 my-4 mx-4')
+          a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 hover:bg-zinc-50 transition-all hover:translate-x-1 no-underline' href='/manage-tours')
+            span.material-symbols-outlined map
+            | Manage Tours
+          a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 hover:bg-zinc-50 transition-all hover:translate-x-1 no-underline' href='/manage-users')
+            span.material-symbols-outlined group
+            | Manage Users
+          a(class='nav__el flex items-center gap-3 px-4 py-3 text-zinc-500 hover:bg-zinc-50 transition-all hover:translate-x-1 no-underline' href='/manage-reviews')
+            span.material-symbols-outlined reviews
+            | Manage Reviews
 
-          if reviews.length === 0
-            .my-reviews__empty
-              svg.my-reviews__empty-icon
-                use(xlink:href='/img/icons.svg#icon-star')
-              p.my-reviews__empty-text You haven't written any reviews yet. Book a tour and share your experience!
-              a.btn.btn--green(href='/') Browse Tours
+    //- Main Content
+    main(class='flex-1 bg-surface-container-low p-margin md:p-section-padding overflow-y-auto')
+      div(class='max-w-4xl mx-auto space-y-10')
+        //- Header
+        div.space-y-2
+          h1(class='text-headline-xl font-headline-xl text-on-surface') My Reviews
+          p(class='text-body-lg font-body-lg text-on-surface-variant max-w-2xl') All the reviews you've shared about your adventure experiences.
 
-          else
+        if reviews.length === 0
+          div(class='text-center py-20')
+            span(class='material-symbols-outlined text-6xl text-outline-variant mb-4 block') rate_review
+            p(class='text-body-lg text-on-surface-variant mb-6') You haven't written any reviews yet. Book a tour and share your experience!
+            a(class='inline-block px-8 py-3 bg-primary-container text-on-primary-container rounded-lg font-label-lg uppercase tracking-widest no-underline hover:brightness-110 transition-all' href='/') Browse Tours
+
+        else
+          div(class='space-y-6')
             each review in reviews
-              .my-review-card(data-review-id=`${review._id}`)
-                .my-review-card__header
+              div(class='bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-100 dark:border-zinc-700 overflow-hidden' data-review-id=`${review._id}`)
+                //- Review Header with Tour Info
+                div(class='flex items-center gap-4 p-6 border-b border-zinc-100 dark:border-zinc-700')
                   if review.tour
-                    img.my-review-card__tour-img(
-                      src=`/img/tours/${review.tour.imageCover}`
-                      alt=`${review.tour.name}`
-                    )
-                  .my-review-card__tour-info
+                    img(class='w-16 h-16 rounded-lg object-cover shadow-sm' src=`/img/tours/${review.tour.imageCover}` alt=`${review.tour.name}`)
+                  div.flex-1
                     if review.tour
-                      a.my-review-card__tour-name(href=`/tour/${review.tour.slug}`)= review.tour.name
-                    .my-review-card__date= review.createdAt.toLocaleString('en-us', {month: 'long', day: 'numeric', year: 'numeric'})
+                      a(class='font-headline-md text-on-surface hover:text-primary transition-colors no-underline text-lg font-semibold' href=`/tour/${review.tour.slug}`)= review.tour.name
+                    p(class='text-label-sm text-on-surface-variant mt-1')= review.createdAt.toLocaleString('en-us', {month: 'long', day: 'numeric', year: 'numeric'})
 
-                .my-review-card__body
+                //- Review Body
+                div.p-6
                   //- Display mode
-                  .my-review-card__display
-                    .my-review-card__rating
-                      each star in [1, 2, 3, 4, 5]
-                        svg.my-review-card__star(class= `my-review-card__star--${review.rating >= star ? 'active' : 'inactive'}`)
-                          use(xlink:href='/img/icons.svg#icon-star')
-                    p.my-review-card__text= review.review
+                  div.my-review-card__display
+                    div(class='flex items-center gap-1 mb-4')
+                      - for(let i = 1; i <= 5; i++)
+                        span(class=`material-symbols-outlined text-[20px] ${i <= review.rating ? 'text-primary' : 'text-outline-variant'}` style=i <= review.rating ? "font-variation-settings: 'FILL' 1" : '') star
+                    p(class='text-body-md text-on-surface-variant leading-relaxed')= review.review
 
                   //- Edit mode (hidden by default)
-                  .my-review-card__edit(style='display: none;')
-                    .form__group.form__rating-group
-                      label.form__label Rating
-                      .form__stars.edit-rating-stars
-                        each star in [1, 2, 3, 4, 5]
-                          svg.form__star(
-                            data-value=`${star}`
-                            class= `form__star--${review.rating >= star ? 'active' : 'inactive'}`
-                          )
-                            use(xlink:href='/img/icons.svg#icon-star')
-                      input.edit-rating-input(type='hidden' value=`${review.rating}`)
+                  div(class='my-review-card__edit' style='display: none;')
+                    div(class='space-y-4')
+                      div
+                        label(class='font-label-lg text-label-lg text-on-surface-variant block uppercase tracking-wider mb-2') Rating
+                        div(class='flex items-center gap-1 edit-rating-stars')
+                          - for(let i = 1; i <= 5; i++)
+                            span(class=`material-symbols-outlined text-[24px] cursor-pointer transition-colors ${i <= review.rating ? 'text-primary' : 'text-outline-variant'} form__star` data-value=`${i}` style=i <= review.rating ? "font-variation-settings: 'FILL' 1" : '') star
+                          input.edit-rating-input(type='hidden' value=`${review.rating}`)
+                      div
+                        textarea(class='edit-review-text w-full border border-outline-variant rounded-lg p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-body-md text-on-surface bg-surface-container-low resize-none' rows='4' required)= review.review
+                      div(class='flex items-center gap-3')
+                        button(class='btn--save-review px-6 py-2 bg-primary-container text-on-primary-container rounded-lg font-label-lg hover:brightness-110 transition-all cursor-pointer border-none') Save
+                        button(class='btn--cancel-review px-6 py-2 bg-surface-container-high text-on-surface rounded-lg font-label-lg hover:bg-surface-container-highest transition-all cursor-pointer border-none') Cancel
 
-                    .form__group
-                      textarea.form__input.form__textarea.edit-review-text(
-                        rows='4'
-                        required
-                      )= review.review
-
-                    .my-review-card__edit-actions
-                      button.btn.btn--small.btn--green.btn--save-review Save
-                      button.btn.btn--small.btn--cancel-review Cancel
-
-                .my-review-card__actions
-                  button.btn-small.btn--edit-review
-                    svg.my-review-card__action-icon
-                      use(xlink:href='/img/icons.svg#icon-edit')
+                //- Actions
+                div(class='flex items-center gap-3 px-6 py-4 bg-surface-container-low dark:bg-zinc-800/50 border-t border-zinc-100 dark:border-zinc-700')
+                  button(class='btn--edit-review flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary-fixed/20 rounded-lg font-label-lg transition-all cursor-pointer border-none bg-transparent')
+                    span(class='material-symbols-outlined text-[18px]') edit
                     | Edit
-                  button.btn-small.btn--delete-review
-                    svg.my-review-card__action-icon
-                      use(xlink:href='/img/icons.svg#icon-trash-2')
+                  button(class='btn--delete-review flex items-center gap-2 px-4 py-2 text-error hover:bg-error-container/50 rounded-lg font-label-lg transition-all cursor-pointer border-none bg-transparent')
+                    span(class='material-symbols-outlined text-[18px]') delete
                     | Delete

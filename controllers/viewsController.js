@@ -33,6 +33,7 @@ exports.getOverview = catchAsync(async (req, res, next) => {
     title: 'All Tours',
     tours,
     favouriteIds,
+    isHomepage: true,
   });
 });
 
@@ -240,3 +241,25 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
     user: updatedUser,
   });
 });
+
+// ==========================================
+// STATIC PAGES
+// ==========================================
+
+exports.getAbout = (req, res) => {
+  res.status(200).render('about', {
+    title: 'About Us',
+  });
+};
+
+exports.getCareers = (req, res) => {
+  res.status(200).render('careers', {
+    title: 'Careers',
+  });
+};
+
+exports.getPrivacy = (req, res) => {
+  res.status(200).render('privacy', {
+    title: 'Privacy Policy',
+  });
+};

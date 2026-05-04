@@ -1,42 +1,17 @@
 extends base
 
+include _reviewCard
+
 block content
-  .main
-    .all-reviews
-      a.all-reviews__back(href=`/tour/${tour.slug}`)
-        svg
-          use(xlink:href='/img/icons.svg#icon-arrow-left')
-        | Back to tour
+  main.flex-grow.pt-20
+    section(class='py-section-padding px-8 max-w-[1280px] mx-auto')
+      div.mb-12
+        a(class='text-primary font-label-lg hover:underline flex items-center gap-1 mb-6 no-underline' href=`/tour/${tour.slug}`)
+          span.material-symbols-outlined arrow_back
+          | Back to #{tour.name}
+        h1(class='font-headline-xl text-headline-xl text-on-surface mb-2') Reviews
+        p(class='font-body-lg text-on-surface-variant')= `${tour.reviews.length} reviews for ${tour.name}`
 
-      .all-reviews__header
-        img.all-reviews__tour-img(src=`/img/tours/${tour.imageCover}`, alt=tour.name)
-        .all-reviews__tour-info
-          a.all-reviews__tour-name(href=`/tour/${tour.slug}`)= tour.name
-          .all-reviews__meta= `${tour.reviews.length} reviews · ${tour.duration}-day ${tour.difficulty} tour`
-
-      .all-reviews__stats
-        .all-reviews__stat
-          .all-reviews__stat-value= tour.ratingAverage.toFixed(1)
-          .all-reviews__stat-label Average Rating
-        .all-reviews__stat
-          .all-reviews__stat-value= tour.reviews.length
-          .all-reviews__stat-label Total Reviews
-        .all-reviews__stat
-          .all-reviews__stat-value= tour.ratingQuantity > 0 ? `${Math.round((tour.reviews.filter(r => r.rating >= 4).length / tour.reviews.length) * 100)}%` : '—'
-          .all-reviews__stat-label Recommend
-
-      .all-reviews__list
+      div(class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter')
         each review in tour.reviews
-          .all-reviews__card
-            .all-reviews__card-header
-              .all-reviews__card-user
-                img.all-reviews__card-avatar(src=`/img/users/${review.user.photo}`, alt=review.user.name)
-                .all-reviews__card-user-info
-                  .all-reviews__card-name= review.user.name
-                  if review.createdAt
-                    .all-reviews__card-date= review.createdAt.toLocaleDateString('en-us', {month: 'short', day: 'numeric', year: 'numeric'})
-              .all-reviews__card-rating
-                each star in [1, 2, 3, 4, 5]
-                  svg.all-reviews__card-star(class= `all-reviews__card-star--${review.rating >= star ? 'active' : 'inactive'}`)
-                    use(xlink:href='/img/icons.svg#icon-star')
-            p.all-reviews__card-text= review.review
+          +reviewCard(review)

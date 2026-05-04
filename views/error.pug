@@ -1,9 +1,9 @@
 extends base
 
 block content
-  main.main
-    .error
-      .error__title
-        h2.heading-secondary.heading-secondary--error Uh oh! Something went wrong!   
-        h2.error__emoji 😢 🤯
-      .error__msg= msg
+  main(class='flex-grow flex items-center justify-center pt-20 px-4 bg-surface-bright min-h-[60vh]')
+    div.text-center
+      h1(class='font-headline-xl text-headline-xl text-error mb-4')= `${err.statusCode || 500}`
+      h2(class='font-headline-lg text-headline-lg text-on-surface mb-6') Something went wrong
+      p(class='font-body-lg text-on-surface-variant mb-10 max-w-lg mx-auto')= err.message
+      a(class='px-10 py-4 bg-primary-container text-on-primary-container rounded-lg font-label-lg uppercase tracking-widest no-underline hover:brightness-110 transition-all' href='/') Back to Home

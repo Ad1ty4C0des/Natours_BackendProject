@@ -1,160 +1,137 @@
 extends base
+
 include _reviewCard
 
-block append head
-  script(src="https://api.mapbox.com/mapbox-gl-js/v3.20.0/mapbox-gl.js")
-  link(href="https://api.mapbox.com/mapbox-gl-js/v3.20.0/mapbox-gl.css" rel="stylesheet")
+mixin factRow(icon, label, value)
+  div(class='flex items-center justify-between border-b border-outline-variant pb-4')
+    div(class='flex items-center gap-4')
+      span(class='material-symbols-outlined text-primary')= icon
+      span(class='font-label-lg uppercase text-on-surface-variant')= label
+    span(class='font-body-lg text-on-surface')= value
 
-mixin overviewBox(label, text, icon)
-  .overview-box__detail
-    svg.overview-box__icon
-      use(xlink:href=`/img/icons.svg#icon-${icon}`)
-    span.overview-box__label= label
-    span.overview-box__text= text
+block content
+  main.flex-grow.pt-20
+    //- Hero Section
+    section(class='relative h-[819px] min-h-[600px] flex items-center justify-center overflow-hidden')
+      div.absolute.inset-0.z-0
+        img(class='w-full h-full object-cover' src=`/img/tours/${tour.imageCover}` alt=`${tour.name}`)
+        div(class='absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent')
+      div(class='relative z-10 text-center text-white px-4')
+        h1(class='text-[56px] md:text-[72px] font-bold text-white mb-6 uppercase tracking-[0.15em] leading-tight font-headline-xl' style='text-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)')= tour.name
+        div(class='flex flex-wrap justify-center gap-6 mt-8')
+          div(class='glass-panel px-6 py-4 rounded-xl flex items-center gap-3 text-on-surface shadow-lg')
+            span(class='material-symbols-outlined text-primary') schedule
+            span(class='font-label-lg uppercase')= `${tour.duration} Days`
+          div(class='glass-panel px-6 py-4 rounded-xl flex items-center gap-3 text-on-surface shadow-lg')
+            span(class='material-symbols-outlined text-primary') groups
+            span(class='font-label-lg uppercase')= `${tour.maxGroupSize} People Max`
+          div(class='glass-panel px-6 py-4 rounded-xl flex items-center gap-3 text-on-surface shadow-lg')
+            span(class='material-symbols-outlined text-primary') trending_up
+            span(class='font-label-lg uppercase')= `${tour.difficulty} Difficulty`
 
-block content 
-  section.section-header
-    .header__hero
-      .header__hero-overlay &nbsp;
-      img.header__hero-img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
-    if user
-      button.heart-btn.heart-btn--detail(data-tour-id=`${tour._id}`, class=isFavourited ? 'heart--active' : 'heart--inactive', title=isFavourited ? 'Remove from favourites' : 'Add to favourites')
-        svg.heart-icon
-          use(xlink:href=`/img/icons.svg#icon-heart`)
+    //- Tour Info Grid
+    section(class='max-w-[1280px] mx-auto px-8 py-section-padding')
+      div(class='grid grid-cols-1 lg:grid-cols-2 gap-20')
+        //- Left: Quick Facts & Guides
+        div.space-y-16
+          div
+            h2(class='font-headline-md text-primary mb-8 uppercase tracking-wider') Quick Facts
+            div.space-y-6
+              +factRow('calendar_today', 'Next Date', tour.startDates && tour.startDates.length > 0 ? new Date(tour.startDates[0].date || tour.startDates[0]).toLocaleDateString('en-us', {month: 'long', year: 'numeric'}) : 'TBD')
+              +factRow('bar_chart', 'Difficulty', tour.difficulty.charAt(0).toUpperCase() + tour.difficulty.slice(1))
+              +factRow('person', 'Participants', `${tour.maxGroupSize} People`)
+              +factRow('star', 'Rating', `${tour.ratingAverage} / 5`)
+          div
+            h2(class='font-headline-md text-primary mb-8 uppercase tracking-wider') Your Tour Guides
+            div.space-y-8
+              each guide in tour.guides
+                div(class='flex items-center gap-6')
+                  img(class='w-16 h-16 rounded-full object-cover shadow-md' src=`/img/users/${guide.photo}` alt=`${guide.name}`)
+                  div
+                    p(class='font-label-lg uppercase text-primary')= guide.role === 'lead-guide' ? 'Lead Guide' : 'Tour Guide'
+                    p(class='font-headline-md text-on-surface')= guide.name
+        //- Right: About
+        div(class='bg-surface-container-lowest p-10 lg:p-16 rounded-2xl shadow-sm border border-outline-variant/30')
+          h2(class='font-headline-lg text-primary mb-10 uppercase tracking-tight')= `About ${tour.name}`
+          div(class='space-y-8 font-body-lg text-on-surface-variant leading-relaxed')
+            p= tour.description
 
-    .heading-box
-      h1.heading-primary
-        span= `${tour.name} tour`
-      .heading-box__group
-        .heading-box__detail
-          svg.heading-box__icon
-            use(xlink:href='/img/icons.svg#icon-clock')
-          span.heading-box__text= `${tour.duration} days`
-        .heading-box__detail
-          svg.heading-box__icon
-            use(xlink:href='/img/icons.svg#icon-map-pin')
-          span.heading-box__text= tour.startLocation.description
+    //- Map
+    if tour.locations && tour.locations.length > 0
+      section(class='max-w-[1280px] mx-auto px-8 pb-section-padding')
+        #map(class='w-full h-[500px] rounded-2xl overflow-hidden shadow-lg' data-locations=`${JSON.stringify(tour.locations)}` data-token=`${mapboxToken}`)
 
-  section.section-description
-    .overview-box
-      div
-        .overview-box__group
-          h2.heading-secondary.ma-bt-lg Quick facts
+    //- Image Gallery
+    section(class='max-w-[1280px] mx-auto px-8 pb-section-padding')
+      h2(class='font-headline-lg text-primary mb-12 text-center uppercase tracking-wider') Tour Highlights
+      div(class='grid grid-cols-1 md:grid-cols-12 gap-6 h-[800px]')
+        div(class='md:col-span-8 relative overflow-hidden rounded-2xl group')
+          img(class='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105' src=`/img/tours/${tour.images[0]}` alt=`${tour.name} 1`)
+          div(class='absolute bottom-0 left-0 right-0 glass-panel p-6 m-6 rounded-xl')
+            p(class='font-label-lg uppercase text-primary') The Experience
+            h3(class='font-headline-md text-on-surface')= tour.name
+        div(class='md:col-span-4 grid grid-rows-2 gap-6')
+          div(class='relative overflow-hidden rounded-2xl group')
+            img(class='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105' src=`/img/tours/${tour.images[1]}` alt=`${tour.name} 2`)
+            div(class='absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all')
+          div(class='relative overflow-hidden rounded-2xl group')
+            img(class='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105' src=`/img/tours/${tour.images[2]}` alt=`${tour.name} 3`)
+            div(class='absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all')
 
-          - const date = tour.startDates && tour.startDates[0] ? tour.startDates[0].date.toLocaleString('en-us', {month: 'long', year: 'numeric'}) : 'TBD'
-          +overviewBox('Next date', date, 'calendar')
-          +overviewBox('Difficulty', tour.difficulty, 'trending-up')
-          +overviewBox('Participants', `${tour.maxGroupSize} people`, 'user')
-          +overviewBox('Rating', `${tour.ratingAverage} / 5`, 'star')
+    //- Reviews
+    if tour.reviews && tour.reviews.length > 0
+      section(class='max-w-[1280px] mx-auto px-8 pb-section-padding')
+        div(class='flex justify-between items-center mb-12')
+          h2(class='font-headline-lg text-primary uppercase tracking-wider') Reviews
+          a(class='text-primary font-label-lg hover:underline' href=`/tour/${tour.slug}/reviews`) See all #{tour.reviews.length} reviews →
+        div(class='grid grid-cols-1 md:grid-cols-3 gap-gutter')
+          each review in tour.reviews.slice(0, 6)
+            +reviewCard(review)
 
-        .overview-box__group
-          h2.heading-secondary.ma-bt-lg Your tour guides
+    //- Booking CTA
+    section(class='max-w-[1280px] mx-auto px-8 pb-section-padding')
+      div(class='relative rounded-3xl overflow-hidden bg-zinc-900 py-20 text-center px-4')
+        div(class='absolute inset-0 opacity-40')
+          img(class='w-full h-full object-cover' src=`/img/tours/${tour.imageCover}` alt=`${tour.name}`)
+        div(class='relative z-10 max-w-2xl mx-auto')
+          h2(class='font-headline-xl text-white mb-4 uppercase tracking-tight') What are you waiting for?
+          p(class='font-body-lg text-zinc-300 mb-10')= `${tour.duration} days. 1 unforgettable adventure. Infinite memories. Make it yours today.`
 
-          each guide in tour.guides
-            .overview-box__detail
-              img.overview-box__img(src=`/img/users/${guide.photo}`, alt=`${guide.name}`)
-
-              - if (guide.role === 'lead-guide')
-                span.overview-box__label Lead Guide
-              - if (guide.role === 'guide')
-                span.overview-box__label Tour Guide
-              span.overview-box__text= guide.name
-
-    .description-box
-      h2.heading-secondary.ma-bt-lg= `About ${tour.name} tour`
-      - const paragraphs = tour.description.split('/n');
-        each p in paragraphs 
-          p.description__text= p
-
-  section.section-pictures
-    each img, i in tour.images
-      .picture-box
-        img.picture-box__img(src=`/img/tours/${img}`, alt=`The Park Camper Tour ${i + 1}`, class= `picture-box__img--${i + 1}`)
-
-  section.section-map
-    #map(data-locations=`${JSON.stringify(tour.locations)}` data-token=`${mapboxToken}`)
-
-  section.section-reviews
-    .section-reviews__header
-      .section-reviews__title Reviews
-        span.section-reviews__count (#{tour.reviews.length})
-      if tour.reviews.length > 6
-        a.btn--see-all(href=`/tour/${tour.slug}/reviews`) See all reviews →
-    .reviews
-      - const displayReviews = tour.reviews.length > 6 ? tour.reviews.slice(0, 6) : tour.reviews
-      each review in displayReviews
-        +reviewCard(review)
-
-  //- Review form — only shown for users who have booked this tour
-  if user && hasBooked
-    section.section-review-form
-      .review-form-container
-        if hasReviewed
-          .review-form__done
-            svg.review-form__done-icon
-              use(xlink:href='/img/icons.svg#icon-check')
-            h2.heading-secondary.ma-bt-lg Thanks for your review!
-            p.review-form__done-text You have already submitted a review for this tour. You can see it in the reviews section above.
-        else
-          h2.heading-secondary.ma-bt-lg Share your experience
-          p.review-form__subtitle Tell us about your adventure — your review helps other travelers!
-          form.form.form--review#review-form(data-tour-id=`${tour.id}`)
-            .form__group.form__rating-group
-              label.form__label Rating
-              .form__stars#rating-stars
-                each star in [1, 2, 3, 4, 5]
-                  svg.form__star.form__star--inactive(data-value=`${star}`)
-                    use(xlink:href='/img/icons.svg#icon-star')
-              input#review-rating(type='hidden' name='rating' value='0')
-
-            .form__group
-              label.form__label(for='review-text') Your Review
-              textarea.form__input.form__textarea#review-text(
-                placeholder='Write your review here... What did you love about this tour?'
-                rows='5'
-                required
-              )
-
-            .form__group
-              button.btn.btn--green.btn--submit-review(type='submit') Submit Review
-
-  section.section-cta
-    .cta
-      .cta__img.cta__img--logo
-        img(src='/img/logo-white.png', alt='Natours logo')
-      if tour.images && tour.images[1]
-        img.cta__img.cta__img--1(src=`/img/tours/${tour.images[1]}`, alt='Tour picture')
-      if tour.images && tour.images[2]
-        img.cta__img.cta__img--2(src=`/img/tours/${tour.images[2]}`, alt='Tour picture')
-      .cta__content
-        if user && hasBooked
-          h2.heading-secondary You're going on this tour!
-          p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. You've already booked — get ready!`
-          a.btn.btn--green.span-all-rows(href='/my-tours') View My Bookings
-        else
-          h2.heading-secondary What are you waiting for?
-          p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
           if user
-            - const datesData = JSON.stringify(tour.startDates.map(d => ({ date: d.date.toISOString(), participants: d.participants, soldOut: d.soldOut })))
-            .cta__date-picker
-              .cta__field
-                label.cta__date-label(for='tour-date') Select a start date
-                select.cta__date-select#tour-date(data-dates=datesData, data-max-group=tour.maxGroupSize)
-                  option(value='') — Choose a date —
-                  each dateObj in tour.startDates
-                    - const d = dateObj.date
-                    - const formatted = d.toLocaleString('en-us', {weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'})
-                    if dateObj.soldOut
-                      option(value=d.toISOString(), disabled) #{formatted} — SOLD OUT
-                    else
-                      - const spotsLeft = tour.maxGroupSize - dateObj.participants
-                      option(value=d.toISOString()) #{formatted} (#{spotsLeft} spots left)
-              .cta__field
-                label.cta__date-label(for='num-people') Number of people
-                .cta__people-input
-                  button.cta__people-btn#people-minus(type='button') −
-                  input.cta__people-value#num-people(type='number', value='1', min='1', max='1', readonly)
-                  button.cta__people-btn#people-plus(type='button') +
-            button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
+            if hasBooked
+              //- Already booked state
+              div(class='inline-flex items-center gap-3 bg-emerald-600/20 border border-emerald-500/40 backdrop-blur-sm px-8 py-5 rounded-full')
+                span(class='material-symbols-outlined text-emerald-400 text-3xl') check_circle
+                span(class='text-emerald-300 font-label-lg uppercase tracking-widest text-lg') Tour Already Booked
+
+            else
+              //- Date & People selection
+              div(class='flex flex-col sm:flex-row items-center justify-center gap-4 mb-8')
+                //- Date Picker
+                div(class='relative')
+                  select#tour-date(class='appearance-none bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl px-6 py-4 pr-12 font-label-lg text-sm uppercase tracking-wider cursor-pointer focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 min-w-[240px]' data-dates=`${JSON.stringify(tour.startDates)}` data-max-group=`${tour.maxGroupSize}`)
+                    option(value='' selected disabled) Choose a date
+                    each dateObj in tour.startDates
+                      - const d = dateObj.date || dateObj
+                      - const spotsLeft = tour.maxGroupSize - (dateObj.participants || 0)
+                      - const isSoldOut = dateObj.soldOut || spotsLeft <= 0
+                      if !isSoldOut
+                        option(value=`${new Date(d).toISOString()}`)= `${new Date(d).toLocaleDateString('en-us', {month: 'short', day: 'numeric', year: 'numeric'})} — ${spotsLeft} spots left`
+                      else
+                        option(value='' disabled)= `${new Date(d).toLocaleDateString('en-us', {month: 'short', day: 'numeric', year: 'numeric'})} — SOLD OUT`
+                  span(class='material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none') calendar_month
+
+                //- People Counter
+                div(class='flex items-center gap-0 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden')
+                  button#people-minus(class='px-4 py-4 text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent' type='button')
+                    span.material-symbols-outlined remove
+                  input#num-people(class='w-12 text-center bg-transparent text-white font-label-lg text-lg border-none outline-none' type='number' value='1' min='1' max='1' readonly)
+                  button#people-plus(class='px-4 py-4 text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent' type='button')
+                    span.material-symbols-outlined add
+                  span(class='text-white/50 font-label-sm pr-4 uppercase tracking-wider text-xs') People
+
+              //- Book Button
+              button#book-tour(class='bg-gradient-to-r from-emerald-600 to-green-500 text-white font-headline-md px-14 py-5 rounded-full hover:scale-105 hover:shadow-emerald-500/30 hover:shadow-2xl transition-all shadow-xl active:scale-100 cursor-pointer border-none text-lg' data-tour-id=`${tour.id}`) Book Tour Now!
+
           else
-            a.btn.btn--green.span-all-rows(href='/login') Log in to book tour
+            a(class='inline-block bg-gradient-to-r from-emerald-600 to-green-500 text-white font-headline-md px-12 py-5 rounded-full hover:scale-105 transition-transform shadow-2xl no-underline' href='/login') Log in to book tour

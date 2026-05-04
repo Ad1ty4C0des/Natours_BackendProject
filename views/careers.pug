@@ -1,0 +1,56 @@
+extends base
+
+block content
+  main.flex-grow.pt-20
+    //- Hero
+    section(class='relative h-[400px] flex items-center justify-center overflow-hidden')
+      div.absolute.inset-0.z-0
+        img(class='w-full h-full object-cover' src='/img/tours/tour-4-cover.jpg' alt='Careers at Natours')
+        div(class='absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent')
+      div(class='relative z-10 text-center text-white px-4 max-w-3xl mx-auto')
+        span(class='text-primary-fixed font-label-lg uppercase tracking-[0.2em] mb-4 block') Join Our Team
+        h1(class='font-headline-xl text-white mb-4') Careers at Natours
+        p(class='font-body-lg text-zinc-200') Build your career where the office view changes every week.
+
+    //- Why Work With Us
+    section(class='max-w-[1280px] mx-auto px-8 py-section-padding')
+      div(class='text-center mb-16')
+        span(class='text-primary font-label-lg uppercase tracking-[0.2em] mb-4 block') Why Natours?
+        h2(class='font-headline-lg text-headline-lg text-on-surface') More Than Just a Job
+
+      div(class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter')
+        each perk in [{icon: 'flight_takeoff', title: 'Free Expeditions', desc: 'Two complimentary adventure trips per year for all team members and a plus-one.'}, {icon: 'health_and_safety', title: 'Full Benefits', desc: 'Comprehensive health, dental, and vision coverage from day one. Your wellbeing matters.'}, {icon: 'work_off', title: 'Flexible Remote', desc: 'Work from anywhere. Our team spans 12 countries and 6 time zones.'}, {icon: 'school', title: 'Growth Budget', desc: '$2,000 annual learning stipend for courses, certifications, and conferences.'}]
+          div(class='bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:-translate-y-2 transition-all duration-300')
+            span(class='material-symbols-outlined text-4xl text-primary mb-4 block')= perk.icon
+            h3(class='font-headline-md text-on-surface mb-3 text-lg')= perk.title
+            p(class='font-body-md text-on-surface-variant')= perk.desc
+
+    //- Open Positions
+    section(class='bg-surface-container-low py-section-padding')
+      div(class='max-w-[1280px] mx-auto px-8')
+        div(class='text-center mb-16')
+          span(class='text-primary font-label-lg uppercase tracking-[0.2em] mb-4 block') Open Positions
+          h2(class='font-headline-lg text-headline-lg text-on-surface') Current Openings
+
+        div(class='max-w-3xl mx-auto space-y-4')
+          each job in [{title: 'Senior Full-Stack Engineer', dept: 'Engineering', loc: 'Remote', type: 'Full-time'}, {title: 'Lead Expedition Guide — Alpine', dept: 'Operations', loc: 'Chamonix, France', type: 'Seasonal'}, {title: 'Content Strategist', dept: 'Marketing', loc: 'Remote', type: 'Full-time'}, {title: 'Marine Expedition Coordinator', dept: 'Operations', loc: 'Lisbon, Portugal', type: 'Full-time'}, {title: 'UX Designer', dept: 'Product', loc: 'Remote', type: 'Contract'}]
+            div(class='bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md transition-all')
+              div
+                h3(class='font-headline-md text-on-surface text-lg font-semibold')= job.title
+                div(class='flex flex-wrap items-center gap-3 mt-2')
+                  span(class='flex items-center gap-1 text-on-surface-variant font-label-sm')
+                    span(class='material-symbols-outlined text-[16px] text-primary') business
+                    = job.dept
+                  span(class='flex items-center gap-1 text-on-surface-variant font-label-sm')
+                    span(class='material-symbols-outlined text-[16px] text-primary') location_on
+                    = job.loc
+                  span(class='bg-primary-fixed text-on-primary-fixed-variant px-3 py-1 rounded-full text-label-sm uppercase font-bold')= job.type
+              button(class='px-6 py-3 bg-primary-container text-on-primary-container rounded-lg font-label-lg uppercase tracking-wider hover:brightness-110 transition-all cursor-pointer border-none whitespace-nowrap') Apply Now
+
+    //- Culture CTA
+    section(class='max-w-[1280px] mx-auto px-8 py-section-padding')
+      div(class='bg-surface-container-lowest rounded-2xl p-12 md:p-16 border border-outline-variant/30 shadow-sm text-center')
+        span(class='material-symbols-outlined text-6xl text-primary mb-6 block') mail
+        h2(class='font-headline-lg text-on-surface mb-4') Don't See Your Role?
+        p(class='font-body-lg text-on-surface-variant max-w-xl mx-auto mb-8') We're always looking for exceptional people. Send us your resume and tell us how you'd make Natours better.
+        a(class='inline-block px-10 py-4 bg-primary text-on-primary rounded-lg font-label-lg uppercase tracking-widest no-underline hover:opacity-90 transition-all' href='mailto:careers@natours.io') Get in Touch

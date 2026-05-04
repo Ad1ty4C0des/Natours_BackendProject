@@ -1,47 +1,77 @@
 /* eslint-disable */
 
 export const displayMap = (locations) => {
+  const LIGHT_STYLE = 'mapbox://styles/ad1c0des/cmn9c7w34003q01qs7ym7672i';
+  const DARK_STYLE = 'mapbox://styles/mapbox/dark-v11';
+
+  const isDark = () => document.documentElement.classList.contains('dark');
+
   const map = new mapboxgl.Map({
-    container: 'map', // container ID
-    style: 'mapbox://styles/ad1c0des/cmn9c7w34003q01qs7ym7672i',
-    // center: [-118.113965, 34.104044],
-    // zoom: 9,
+    container: 'map',
+    style: isDark() ? DARK_STYLE : LIGHT_STYLE,
     scrollZoom: false,
   });
 
   const bounds = new mapboxgl.LngLatBounds();
+  const markers = [];
 
-  locations.forEach((loc) => {
-    //Create marker
-    const el = document.createElement('div');
-    el.className = 'marker';
+  function addMarkers() {
+    // Clear existing markers
+    markers.forEach((m) => m.remove());
+    markers.length = 0;
 
-    //Add Marker
-    new mapboxgl.Marker({
-      element: el,
-      anchor: 'bottom',
-    })
-      .setLngLat(loc.coordinates)
-      .addTo(map);
+    locations.forEach((loc) => {
+      const el = document.createElement('div');
+      el.className = 'marker';
 
-    //Add popup
-    new mapboxgl.Popup({
-      offset: 30,
-    })
-      .setLngLat(loc.coordinates)
-      .setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`)
-      .addTo(map);
+      const popup = new mapboxgl.Popup({
+        offset: 36,
+        closeButton: false,
+        closeOnClick: false,
+        className: 'natours-popup',
+      }).setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`);
 
-    //extend bounds to include current locations
-    bounds.extend(loc.coordinates);
+      const marker = new mapboxgl.Marker({
+        element: el,
+        anchor: 'bottom',
+      })
+        .setLngLat(loc.coordinates)
+        .setPopup(popup)
+        .addTo(map);
+
+      el.addEventListener('mouseenter', () => {
+        if (!marker.getPopup().isOpen()) marker.togglePopup();
+      });
+      el.addEventListener('mouseleave', () => {
+        if (marker.getPopup().isOpen()) marker.togglePopup();
+      });
+
+      markers.push(marker);
+      bounds.extend(loc.coordinates);
+    });
+  }
+
+  // Initial markers
+  map.on('load', () => {
+    addMarkers();
+    map.fitBounds(bounds, {
+      padding: { top: 200, bottom: 150, left: 100, right: 100 },
+    });
   });
 
-  map.fitBounds(bounds, {
-    padding: {
-      top: 200,
-      bottom: 150,
-      left: 100,
-      right: 100,
-    },
+  // Watch for dark mode toggle and swap map style
+  const observer = new MutationObserver(() => {
+    const newStyle = isDark() ? DARK_STYLE : LIGHT_STYLE;
+    map.setStyle(newStyle);
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+
+  // Re-add markers after style swap (setStyle removes all layers)
+  map.on('style.load', () => {
+    addMarkers();
   });
 };

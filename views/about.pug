@@ -1,0 +1,87 @@
+extends base
+
+block content
+  main.flex-grow.pt-20
+    //- Hero
+    section(class='relative h-[500px] flex items-center justify-center overflow-hidden')
+      div.absolute.inset-0.z-0
+        img(class='w-full h-full object-cover' src='/img/tours/tour-3-cover.jpg' alt='Natours Adventure')
+        div(class='absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent')
+      div(class='relative z-10 text-center text-white px-4 max-w-3xl mx-auto')
+        span(class='text-primary-fixed font-label-lg uppercase tracking-[0.2em] mb-4 block') Est. 2015
+        h1(class='font-headline-xl text-white mb-6') About Natours
+        p(class='font-body-lg text-zinc-200') We craft premium adventure experiences for the modern explorer who demands more from travel.
+
+    //- Mission
+    section(class='max-w-[1280px] mx-auto px-8 py-section-padding')
+      div(class='grid grid-cols-1 lg:grid-cols-2 gap-20 items-center')
+        div
+          span(class='text-primary font-label-lg uppercase tracking-[0.2em] mb-4 block') Our Mission
+          h2(class='font-headline-lg text-headline-lg text-on-surface mb-8') Redefining Adventure Travel
+          div(class='space-y-6 font-body-lg text-on-surface-variant leading-relaxed')
+            p Natours was born from a simple belief: the world's most extraordinary landscapes deserve to be experienced, not just visited. Founded by a team of mountaineers, marine biologists, and luxury hospitality experts, we've spent nearly a decade building a new category of adventure travel.
+            p Every Natours expedition is meticulously designed to balance adrenaline with comfort, solitude with connection, and exploration with sustainability. We don't just take you to beautiful places — we immerse you in them.
+            p From the crystalline waters of the Mediterranean to the untouched wilderness of Patagonia, our curated itineraries are crafted by local experts who know every hidden trail, secret cove, and breathtaking viewpoint.
+        div(class='relative')
+          img(class='w-full h-[500px] object-cover rounded-2xl shadow-lg' src='/img/tours/tour-1-1.jpg' alt='Adventure')
+          div(class='absolute -bottom-8 -left-8 glass-panel p-6 rounded-xl shadow-lg')
+            p(class='text-[48px] font-bold text-primary leading-none') 50K+
+            p(class='font-label-lg text-on-surface-variant uppercase tracking-wider mt-1') Happy Explorers
+
+    //- Values
+    section(class='bg-surface-container-low py-section-padding')
+      div(class='max-w-[1280px] mx-auto px-8')
+        div(class='text-center mb-16')
+          span(class='text-primary font-label-lg uppercase tracking-[0.2em] mb-4 block') What We Stand For
+          h2(class='font-headline-lg text-headline-lg text-on-surface') Our Core Values
+
+        div(class='grid grid-cols-1 md:grid-cols-3 gap-gutter')
+          div(class='bg-surface-container-lowest rounded-xl p-10 border border-outline-variant/30 shadow-sm text-center hover:-translate-y-2 transition-all duration-300')
+            span(class='material-symbols-outlined text-5xl text-primary mb-6 block') eco
+            h3(class='font-headline-md text-on-surface mb-4') Sustainability First
+            p(class='font-body-md text-on-surface-variant') Every tour is carbon-offset. We partner with local conservation programs and ensure our presence leaves only footprints — and funding for preservation.
+
+          div(class='bg-surface-container-lowest rounded-xl p-10 border border-outline-variant/30 shadow-sm text-center hover:-translate-y-2 transition-all duration-300')
+            span(class='material-symbols-outlined text-5xl text-primary mb-6 block') shield
+            h3(class='font-headline-md text-on-surface mb-4') Safety Without Compromise
+            p(class='font-body-md text-on-surface-variant') Our guides are certified professionals with decades of combined experience. We maintain the highest safety standards so you can push your limits with confidence.
+
+          div(class='bg-surface-container-lowest rounded-xl p-10 border border-outline-variant/30 shadow-sm text-center hover:-translate-y-2 transition-all duration-300')
+            span(class='material-symbols-outlined text-5xl text-primary mb-6 block') diversity_3
+            h3(class='font-headline-md text-on-surface mb-4') Small Groups, Big Impact
+            p(class='font-body-md text-on-surface-variant') We cap every expedition at 15 people. This ensures personalized attention, authentic local interactions, and minimal environmental disruption.
+
+    //- Team
+    section(class='max-w-[1280px] mx-auto px-8 py-section-padding')
+      div(class='text-center mb-16')
+        span(class='text-primary font-label-lg uppercase tracking-[0.2em] mb-4 block') The People Behind The Journeys
+        h2(class='font-headline-lg text-headline-lg text-on-surface') Meet Our Leadership
+
+      div(class='grid grid-cols-1 md:grid-cols-3 gap-gutter')
+        div(class='text-center')
+          img(class='w-32 h-32 rounded-full object-cover mx-auto shadow-lg mb-6 border-4 border-primary-container/30' src='/img/users/user-7.jpg' alt='CEO')
+          h3(class='font-headline-md text-on-surface mb-1') Miyah Myles
+          p(class='font-label-lg text-primary uppercase tracking-wider mb-4') Founder & CEO
+          p(class='font-body-md text-on-surface-variant max-w-xs mx-auto') Former mountaineering guide with 15 years in expedition leadership. Passionate about making wilderness accessible.
+
+        div(class='text-center')
+          img(class='w-32 h-32 rounded-full object-cover mx-auto shadow-lg mb-6 border-4 border-primary-container/30' src='/img/users/user-12.jpg' alt='COO')
+          h3(class='font-headline-md text-on-surface mb-1') Jennifer Hardy
+          p(class='font-label-lg text-primary uppercase tracking-wider mb-4') Head of Operations
+          p(class='font-body-md text-on-surface-variant max-w-xs mx-auto') Logistics expert who ensures every expedition runs with Swiss precision and warmth.
+
+        div(class='text-center')
+          img(class='w-32 h-32 rounded-full object-cover mx-auto shadow-lg mb-6 border-4 border-primary-container/30' src='/img/users/user-6.jpg' alt='Guide Director')
+          h3(class='font-headline-md text-on-surface mb-1') Steve T. Scaife
+          p(class='font-label-lg text-primary uppercase tracking-wider mb-4') Director of Guides
+          p(class='font-body-md text-on-surface-variant max-w-xs mx-auto') Marine biologist turned adventure curator. Designs our most popular coastal and diving itineraries.
+
+    //- CTA
+    section(class='max-w-[1280px] mx-auto px-8 pb-section-padding')
+      div(class='relative rounded-3xl overflow-hidden bg-zinc-900 py-24 text-center px-4')
+        div(class='absolute inset-0 opacity-30')
+          img(class='w-full h-full object-cover' src='/img/tours/tour-6-cover.jpg' alt='Adventure')
+        div(class='relative z-10 max-w-2xl mx-auto')
+          h2(class='font-headline-xl text-white mb-6 uppercase tracking-tight') Ready for Your Next Adventure?
+          p(class='font-body-lg text-zinc-300 mb-12') Join 50,000+ explorers who trust Natours to deliver life-changing experiences.
+          a(class='inline-block bg-secondary-container text-on-secondary-fixed font-headline-md px-12 py-5 rounded-full hover:scale-105 transition-transform shadow-2xl no-underline' href='/') Explore All Tours

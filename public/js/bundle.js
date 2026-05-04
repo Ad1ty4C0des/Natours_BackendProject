@@ -1,4 +1,4 @@
-var app = (() => {
+(() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all3) => {
     for (var name in all3)
@@ -7,34 +7,58 @@ var app = (() => {
 
   // public/js/mapbox.js
   var displayMap = (locations) => {
+    const LIGHT_STYLE = "mapbox://styles/ad1c0des/cmn9c7w34003q01qs7ym7672i";
+    const DARK_STYLE = "mapbox://styles/mapbox/dark-v11";
+    const isDark = () => document.documentElement.classList.contains("dark");
     const map = new mapboxgl.Map({
       container: "map",
-      // container ID
-      style: "mapbox://styles/ad1c0des/cmn9c7w34003q01qs7ym7672i",
-      // center: [-118.113965, 34.104044],
-      // zoom: 9,
+      style: isDark() ? DARK_STYLE : LIGHT_STYLE,
       scrollZoom: false
     });
     const bounds = new mapboxgl.LngLatBounds();
-    locations.forEach((loc) => {
-      const el = document.createElement("div");
-      el.className = "marker";
-      new mapboxgl.Marker({
-        element: el,
-        anchor: "bottom"
-      }).setLngLat(loc.coordinates).addTo(map);
-      new mapboxgl.Popup({
-        offset: 30
-      }).setLngLat(loc.coordinates).setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`).addTo(map);
-      bounds.extend(loc.coordinates);
+    const markers = [];
+    function addMarkers() {
+      markers.forEach((m) => m.remove());
+      markers.length = 0;
+      locations.forEach((loc) => {
+        const el = document.createElement("div");
+        el.className = "marker";
+        const popup = new mapboxgl.Popup({
+          offset: 36,
+          closeButton: false,
+          closeOnClick: false,
+          className: "natours-popup"
+        }).setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`);
+        const marker = new mapboxgl.Marker({
+          element: el,
+          anchor: "bottom"
+        }).setLngLat(loc.coordinates).setPopup(popup).addTo(map);
+        el.addEventListener("mouseenter", () => {
+          if (!marker.getPopup().isOpen()) marker.togglePopup();
+        });
+        el.addEventListener("mouseleave", () => {
+          if (marker.getPopup().isOpen()) marker.togglePopup();
+        });
+        markers.push(marker);
+        bounds.extend(loc.coordinates);
+      });
+    }
+    map.on("load", () => {
+      addMarkers();
+      map.fitBounds(bounds, {
+        padding: { top: 200, bottom: 150, left: 100, right: 100 }
+      });
     });
-    map.fitBounds(bounds, {
-      padding: {
-        top: 200,
-        bottom: 150,
-        left: 100,
-        right: 100
-      }
+    const observer = new MutationObserver(() => {
+      const newStyle = isDark() ? DARK_STYLE : LIGHT_STYLE;
+      map.setStyle(newStyle);
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+    map.on("style.load", () => {
+      addMarkers();
     });
   };
 
@@ -3341,4 +3365,3 @@ var app = (() => {
   var alertMessage = document.querySelector("body").dataset.alert;
   if (alertMessage) showAlert("success", alertMessage, 7);
 })();
-//# sourceMappingURL=bundle.js.map

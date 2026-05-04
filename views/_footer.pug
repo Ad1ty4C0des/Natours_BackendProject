@@ -1,17 +1,11 @@
-footer.footer
-  .footer__inner
-    .footer__brand
-      .footer__logo
-        img(src="/img/logo-green.png", alt="Natours logo")
-
-    .footer__links
-      .footer__col
-        ul.footer__nav
-          li: a(href="/") All Tours
-          li: a(href="#") Sustainability
-          li: a(href="#") Contact
-          li: a(href="#") Terms of Service
-          li: a(href="#") Privacy Policy
-
-  .footer__bottom
-    p.footer__copyright © #{new Date().getFullYear()} Natours. All rights reserved.
+footer(class='w-full border-t mt-20 border-stone-200 dark:border-zinc-800 bg-stone-50 dark:bg-zinc-900 transition-colors duration-300')
+  div(class='max-w-[1280px] mx-auto py-16 px-8 flex flex-col md:flex-row justify-between items-center gap-8')
+    div(class='flex flex-col items-center md:items-start gap-4')
+      div(class='text-xl font-bold text-stone-800 dark:text-zinc-200') Natours
+      p(class='text-stone-500 dark:text-zinc-500 font-serif text-xs uppercase tracking-widest text-center md:text-left')
+        | © #{new Date().getFullYear()} Natours Adventure. Built for the technical explorer.
+    div(class='flex flex-wrap justify-center gap-8')
+      a(class='text-stone-500 dark:text-zinc-500 font-serif text-xs uppercase tracking-widest hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors opacity-80 hover:opacity-100 no-underline' href='/') All Tours
+      a(class='text-stone-500 dark:text-zinc-500 font-serif text-xs uppercase tracking-widest hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors opacity-80 hover:opacity-100 no-underline' href='/about') About Us
+      a(class='text-stone-500 dark:text-zinc-500 font-serif text-xs uppercase tracking-widest hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors opacity-80 hover:opacity-100 no-underline' href='/careers') Careers
+      a(class='text-stone-500 dark:text-zinc-500 font-serif text-xs uppercase tracking-widest hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors opacity-80 hover:opacity-100 no-underline' href='/privacy') Privacy Policy

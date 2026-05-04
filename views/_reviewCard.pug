@@ -1,10 +1,10 @@
 mixin reviewCard(review)
-  .reviews__card
-    .reviews__avatar
-      img.reviews__avatar-img(src=`/img/users/${review.user.photo}`, alt=`${review.user.name}`)
-      h6.reviews__user= review.user.name
-    p.reviews__text= review.review
-    .reviews__rating
-      each star in [1, 2, 3, 4, 5]
-        svg.reviews__star(class= `reviews__star--${review.rating >= star ? 'active' : 'inactive'}`)
-          use(xlink:href='/img/icons.svg#icon-star')
+  div(class='bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/30 shadow-sm hover:-translate-y-1 transition-all duration-300')
+    div(class='flex items-center gap-4 mb-6')
+      img(class='w-12 h-12 rounded-full object-cover shadow-sm' src=`/img/users/${review.user.photo}` alt=`${review.user.name}`)
+      div
+        p(class='font-label-lg text-on-surface font-bold')= review.user.name
+    p(class='font-body-md text-on-surface-variant mb-6 line-clamp-4')= review.review
+    div(class='flex items-center gap-1')
+      - for(let i = 1; i <= 5; i++)
+        span(class=`material-symbols-outlined text-[18px] ${i <= review.rating ? 'text-primary' : 'text-outline-variant'}` style=i <= review.rating ? "font-variation-settings: 'FILL' 1" : '') star
