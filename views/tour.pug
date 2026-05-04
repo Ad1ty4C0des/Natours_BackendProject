@@ -75,8 +75,14 @@ block content
     #map(data-locations=`${JSON.stringify(tour.locations)}` data-token=`${mapboxToken}`)
 
   section.section-reviews
+    .section-reviews__header
+      .section-reviews__title Reviews
+        span.section-reviews__count (#{tour.reviews.length})
+      if tour.reviews.length > 6
+        a.btn--see-all(href=`/tour/${tour.slug}/reviews`) See all reviews →
     .reviews
-      each review in tour.reviews
+      - const displayReviews = tour.reviews.length > 6 ? tour.reviews.slice(0, 6) : tour.reviews
+      each review in displayReviews
         +reviewCard(review)
 
   //- Review form — only shown for users who have booked this tour

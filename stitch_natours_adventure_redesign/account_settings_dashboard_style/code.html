@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#6ddd8f",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-fixed": "#e4e2e2",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "surface-dim": "#dadada",
+                        "on-primary-fixed-variant": "#005228",
+                        "tertiary-container": "#b1afaf",
+                        "on-surface-variant": "#3e4a3f",
+                        "on-primary-fixed": "#00210c",
+                        "secondary-container": "#fc7647",
+                        "secondary": "#a8390d",
+                        "inverse-surface": "#2f3131",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#1a1c1c",
+                        "surface-container": "#eeeeee",
+                        "primary-fixed": "#89faa9",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "background": "#f9f9f9",
+                        "surface": "#f9f9f9",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-container": "#651b00",
+                        "on-tertiary-container": "#434343",
+                        "error": "#ba1a1a",
+                        "outline": "#6e7a6e",
+                        "primary": "#006d37",
+                        "tertiary": "#5f5e5e",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#832600",
+                        "tertiary-fixed-dim": "#c8c6c6",
+                        "on-background": "#1a1c1c",
+                        "primary-fixed-dim": "#6ddd8f",
+                        "on-primary-container": "#004e25",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#55c57a",
+                        "secondary-fixed-dim": "#ffb59d",
+                        "outline-variant": "#bdcabc",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-tint": "#006d37",
+                        "secondary-fixed": "#ffdbd0",
+                        "on-secondary-fixed": "#390c00",
+                        "surface-bright": "#f9f9f9",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "base": "8px",
+                        "margin": "32px",
+                        "gutter": "24px",
+                        "section-padding": "80px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Noto Serif"],
+                        "label-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-xl": ["Noto Serif"],
+                        "headline-lg": ["Noto Serif"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "headline-md": ["28px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "label-lg": ["14px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-xl": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200/50 dark:border-zinc-800/50 shadow-sm docked full-width top-0 z-50 sticky">
+<div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white font-serif antialiased">Wilderness Elite</span>
+<nav class="hidden md:flex items-center space-y-0 space-x-6">
+<a class="text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 transition-colors duration-200 cursor-pointer active:opacity-80 font-serif" href="#">Destinations</a>
+<a class="text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 transition-colors duration-200 cursor-pointer active:opacity-80 font-serif" href="#">Experiences</a>
+<a class="text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 transition-colors duration-200 cursor-pointer active:opacity-80 font-serif" href="#">Journal</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-zinc-600 cursor-pointer hover:bg-zinc-50 p-2 rounded-full transition-colors" data-icon="notifications">notifications</button>
+<div class="h-10 w-10 rounded-full bg-zinc-200 overflow-hidden border border-zinc-100">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a sophisticated man with a friendly expression, set against a blurred outdoor background. The lighting is soft and natural, emphasizing a high-end lifestyle aesthetic. The image follows a clean, minimalist style consistent with a premium adventure concierge service's user profile imagery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_kebebvL5XdlElbtyUK_nttHyH3ZGTmgYCXoopyBf1kUbfIpwb-Lgpj2fYqsCp550bAsOO_xJ2CnI2J33ztFcMiRZYdu4--ZR7B5Y2WeLMRGm_ZhciZvLggPZwBrpHEXbGqdVwv4Vi1LMn9p32uuhDW_pwAE7jx4cs352jTwFC_FU9VbT-aF6rd1v_0fN0BPsR5HXgbKnWLuUo3gDIVM_QxSXVpaAKq6aPt24WuHBw-g4OClXV_W1Y7w09v3bnVYVu4PmcjdLniQ"/>
+</div>
+</div>
+</div>
+</header>
+<div class="max-w-7xl mx-auto flex min-h-[calc(100vh-72px)]">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex flex-col h-auto py-8 space-y-2 bg-white dark:bg-zinc-900 h-screen w-64 border-r rounded-none border-r border-zinc-200 dark:border-zinc-800 shadow-none font-serif text-sm font-medium">
+<div class="px-6 mb-8">
+<p class="text-lg font-black text-zinc-900 dark:text-white">Account Central</p>
+<p class="text-xs text-zinc-500 dark:text-zinc-400 font-sans uppercase tracking-widest mt-1">Wilderness Elite Member</p>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-r-4 border-emerald-600 transition-all duration-300 ease-in-out hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+                    Personal Info
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+                    Security
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                    Payments
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+                    Preferences
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300 ease-in-out hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+                    Activity
+                </a>
+</nav>
+<div class="px-6 pt-6">
+<button class="w-full py-3 bg-secondary text-on-secondary rounded-lg font-label-lg transition-transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-secondary/20">
+                    Upgrade Plan
+                </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 bg-surface-container-low p-margin md:p-section-padding overflow-y-auto">
+<div class="max-w-4xl mx-auto space-y-10">
+<!-- Header Section -->
+<div class="space-y-2">
+<h1 class="text-headline-xl font-headline-xl text-on-surface">Personal Info</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">Manage your expedition identity and preferences. This information is used to personalize your travel documents and logistics.</p>
+</div>
+<!-- Bento Grid for Profile Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-zinc-100 flex items-center gap-6">
+<div class="relative group">
+<div class="h-24 w-24 rounded-full overflow-hidden border-4 border-primary-container/30">
+<img alt="Profile Large" class="w-full h-full object-cover" data-alt="A detailed portrait of a middle-aged man with a confident look, dressed in outdoor premium gear. He is standing against a mountain vista during golden hour. The image conveys wealth, adventure, and reliability, featuring warm natural lighting and high-end photographic textures suitable for an elite adventure dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3WQJOIZjNJNDfKzBepEW7blbBwrPLNU2up21-JoEYA1KbDsKE-pvaNiICVeMaF5vn78rmIhPU1e0KhWhHvq0ODWBkV85ixrtB-snosEHENlBISBqz51O8mGAobpgOSiX_iZvK-7LZDHCFxmYqLuK95lWGbLN2AyLfJElwrQgL5P8bryitsSFURLMK7I-oXnUjMUv7iwyb37qZbNxQgqG5SLOv_m82-1ShKXmQ_DCXFZZhP_W0K4RYkvDYC8qxm7YpXTPomQF4WoQ"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg hover:bg-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="photo_camera">photo_camera</span>
+</button>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Jameson Sterling</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Elite Tier Member since 2021</p>
+<div class="mt-2 flex gap-2">
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-label-sm font-label-sm">LEVEL: ADVANCED</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-label-sm font-label-sm">8 EXPEDITIONS</span>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-xl p-6 shadow-sm border border-zinc-100 flex flex-col justify-center">
+<p class="text-label-lg font-label-lg text-secondary uppercase tracking-widest mb-1">Loyalty Points</p>
+<p class="text-[32px] font-bold text-on-surface">12,450</p>
+<a class="text-primary text-label-sm font-label-sm flex items-center gap-1 mt-2 hover:underline" href="#">
+                            Redeem Rewards <span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Account Information Card -->
+<section class="bg-white rounded-xl shadow-sm border border-zinc-100 overflow-hidden">
+<div class="px-8 py-6 border-b border-zinc-100 flex justify-between items-center">
+<h2 class="text-headline-md font-headline-md text-on-surface">Account Details</h2>
+<button class="text-primary hover:text-on-primary-container font-label-lg transition-colors">Edit All</button>
+</div>
+<div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+<div class="space-y-1">
+<label class="text-label-lg font-label-lg text-on-surface-variant uppercase">Full Name</label>
+<div class="relative">
+<input class="w-full border-b border-zinc-200 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent" type="text" value="Jameson Sterling"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-label-lg font-label-lg text-on-surface-variant uppercase">Email Address</label>
+<div class="relative">
+<input class="w-full border-b border-zinc-200 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent" type="email" value="j.sterling@wilderness.co"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-label-lg font-label-lg text-on-surface-variant uppercase">Phone Number</label>
+<div class="relative">
+<input class="w-full border-b border-zinc-200 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent" type="tel" value="+1 (555) 982-0123"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-label-lg font-label-lg text-on-surface-variant uppercase">Location</label>
+<div class="relative">
+<input class="w-full border-b border-zinc-200 py-2 focus:border-primary outline-none text-body-md font-body-md bg-transparent" type="text" value="Aspen, Colorado"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Preferences Card -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="bg-white rounded-xl p-8 shadow-sm border border-zinc-100 space-y-6">
+<h3 class="text-headline-md font-headline-md text-on-surface">Expedition Mode</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Select your preferred intensity for curated adventure recommendations.</p>
+<div class="flex flex-col gap-3">
+<label class="flex items-center justify-between p-4 rounded-lg border border-zinc-100 hover:border-primary-container cursor-pointer transition-colors bg-zinc-50/50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="terrain">terrain</span>
+<span class="font-label-lg">Rugged Exploration</span>
+</div>
+<input checked="" class="text-primary focus:ring-primary h-4 w-4" name="mode" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-lg border border-zinc-100 hover:border-primary-container cursor-pointer transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-zinc-400" data-icon="spa">spa</span>
+<span class="font-label-lg text-on-surface-variant">Technical Luxury</span>
+</div>
+<input class="text-primary focus:ring-primary h-4 w-4" name="mode" type="radio"/>
+</label>
+</div>
+</div>
+<div class="bg-white rounded-xl p-8 shadow-sm border border-zinc-100 space-y-6">
+<h3 class="text-headline-md font-headline-md text-on-surface">Notifications</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Manage how you receive alerts for new destinations and booking updates.</p>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-body-md font-medium">New Itinerary Alerts</span>
+<div class="w-12 h-6 bg-primary rounded-full relative p-1 flex items-center justify-end">
+<div class="h-4 w-4 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-body-md font-medium">Weather Updates</span>
+<div class="w-12 h-6 bg-primary rounded-full relative p-1 flex items-center justify-end">
+<div class="h-4 w-4 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-body-md font-medium">Newsletter</span>
+<div class="w-12 h-6 bg-zinc-200 rounded-full relative p-1 flex items-center justify-start">
+<div class="h-4 w-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Mobile Navigation -->
+<footer class="lg:hidden fixed bottom-0 w-full z-50 border-t bg-white/90 dark:bg-zinc-900/90 backdrop-blur-lg border-t border-zinc-200 dark:border-zinc-800 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] lg:hidden flex justify-around items-center h-16 pb-safe">
+<button class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 transition-transform duration-200 active:bg-zinc-100 dark:active:bg-zinc-800">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="text-[10px] uppercase tracking-widest font-sans">Explore</span>
+</button>
+<button class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 transition-transform duration-200 active:bg-zinc-100 dark:active:bg-zinc-800">
+<span class="material-symbols-outlined" data-icon="terrain">terrain</span>
+<span class="text-[10px] uppercase tracking-widest font-sans">Trips</span>
+</button>
+<button class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 transition-transform duration-200 active:bg-zinc-100 dark:active:bg-zinc-800">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="text-[10px] uppercase tracking-widest font-sans">Saved</span>
+</button>
+<button class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold scale-110 transition-transform duration-200 active:bg-zinc-100 dark:active:bg-zinc-800">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] uppercase tracking-widest font-sans">Settings</span>
+</button>
+</footer>
+</body></html>

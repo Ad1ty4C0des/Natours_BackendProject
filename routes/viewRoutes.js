@@ -14,6 +14,11 @@ router.get(
   viewsController.getOverview,
 );
 router.get('/tour/:slug', authController.isLoggedIn, viewsController.getTour);
+router.get(
+  '/tour/:slug/reviews',
+  authController.isLoggedIn,
+  viewsController.getTourReviews,
+);
 router.get('/login', authController.isLoggedIn, viewsController.getLoginForm);
 router.get('/signup', authController.isLoggedIn, viewsController.getSignupForm);
 router.get('/forgot-password', viewsController.getForgotPasswordForm);
