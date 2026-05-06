@@ -412,7 +412,7 @@ npm run delete:data # Purge database
 
 ## 🙏 Acknowledgments
 
-- Built as an extended version of Jonas Schmedtmann's [Node.js course](https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/) — significantly enhanced with modern features, a custom editorial UI, Stripe integration, favourites system, dark mode, and more.
+- Built as an extended version of Jonas Schmedtmann's [Node.js project](https://github.com/jonasschmedtmann/complete-node-bootcamp) — significantly enhanced with modern features, a custom editorial UI, Stripe integration, favourites system, dark mode, and more.
 - Design inspired by premium travel platforms and modern editorial aesthetics.
 
 <br/>
