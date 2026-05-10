@@ -1,5 +1,5 @@
 nav.fixed.top-0.w-full.z-50(class='bg-white/60 dark:bg-zinc-900/70 backdrop-blur-2xl border-b border-stone-200/30 dark:border-zinc-700/30 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-300')
-  div(class='max-w-[1280px] mx-auto flex items-center px-8 h-20 relative')
+  div(class='max-w-[1280px] mx-auto flex items-center px-4 sm:px-8 h-20 relative')
     //- Logo — left
     a.no-underline(href='/')
       span(class='text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter') Natours
@@ -8,7 +8,7 @@ nav.fixed.top-0.w-full.z-50(class='bg-white/60 dark:bg-zinc-900/70 backdrop-blur
       a(class='text-stone-800 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-sans text-[15px] font-semibold tracking-wide no-underline' href='/') All Tours
       a(class='text-stone-800 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-sans text-[15px] font-semibold tracking-wide no-underline' href='/about') About
     //- Right side — theme toggle + auth
-    div(class='flex items-center gap-5 ml-auto')
+    div(class='flex items-center gap-3 sm:gap-5 ml-auto')
       //- Dark mode toggle
       button(class='theme-toggle' id='theme-toggle' title='Toggle dark mode')
         span.toggle-thumb
@@ -20,8 +20,8 @@ nav.fixed.top-0.w-full.z-50(class='bg-white/60 dark:bg-zinc-900/70 backdrop-blur
         div(class='relative' id='user-dropdown-container')
           button(class='flex items-center gap-2 cursor-pointer bg-transparent border-none outline-none' id='user-dropdown-toggle')
             img(class='w-9 h-9 rounded-full border-2 border-stone-200 dark:border-zinc-600 object-cover' src=`/img/users/${user.photo}` alt=`Photo of ${user.name}`)
-            span(class='text-stone-700 dark:text-zinc-200 font-sans text-sm font-semibold')= user.name.split(' ')[0]
-            span(class='material-symbols-outlined text-stone-400 dark:text-zinc-500 text-[18px] transition-transform duration-200' id='dropdown-chevron') expand_more
+            span(class='hidden sm:inline-block text-stone-700 dark:text-zinc-200 font-sans text-sm font-semibold')= user.name.split(' ')[0]
+            span(class='hidden sm:inline-block material-symbols-outlined text-stone-400 dark:text-zinc-500 text-[18px] transition-transform duration-200' id='dropdown-chevron') expand_more
           //- Dropdown menu
           div(class='absolute right-0 top-full mt-2 w-52 bg-white dark:bg-zinc-800 rounded-xl shadow-lg border border-stone-200 dark:border-zinc-700 overflow-hidden opacity-0 invisible translate-y-2 transition-all duration-200 ease-out z-50' id='user-dropdown-menu')
             div(class='px-4 py-3 border-b border-stone-100 dark:border-zinc-700')
@@ -34,35 +34,79 @@ nav.fixed.top-0.w-full.z-50(class='bg-white/60 dark:bg-zinc-900/70 backdrop-blur
               span(class='material-symbols-outlined text-[20px]') logout
               | Log Out
       else
-        a(class='px-5 py-2 text-stone-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-sans text-sm font-medium tracking-wide no-underline' href='/login') Login
-        a(class='px-6 py-2.5 bg-primary text-on-primary rounded-lg font-sans text-sm font-semibold tracking-wide hover:opacity-90 transition-all duration-200 ease-in-out no-underline' href='/signup') Sign Up
+        a(class='hidden sm:inline-block px-5 py-2 text-stone-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-sans text-sm font-medium tracking-wide no-underline' href='/login') Login
+        a(class='hidden sm:inline-block px-6 py-2.5 bg-primary text-on-primary rounded-lg font-sans text-sm font-semibold tracking-wide hover:opacity-90 transition-all duration-200 ease-in-out no-underline' href='/signup') Sign Up
+
+      //- Mobile Menu Toggle
+      button(class='md:hidden flex items-center justify-center p-2 text-stone-600 dark:text-zinc-300 bg-transparent border-none outline-none' id='mobile-menu-toggle')
+        span(class='material-symbols-outlined text-2xl') menu
+
+  //- Mobile Menu Full Screen Overlay
+  div(class='fixed inset-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md z-40 opacity-0 invisible transition-all duration-300 md:hidden flex flex-col items-center justify-center gap-8' id='mobile-menu')
+    button(class='absolute top-6 right-8 text-stone-600 dark:text-zinc-300 bg-transparent border-none outline-none p-2' id='mobile-menu-close')
+      span(class='material-symbols-outlined text-3xl') close
+    a(class='text-2xl font-bold text-stone-800 dark:text-zinc-100 no-underline' href='/') All Tours
+    a(class='text-2xl font-bold text-stone-800 dark:text-zinc-100 no-underline' href='/about') About
+    if !user
+      div(class='flex flex-col gap-4 mt-8 w-full max-w-xs px-8')
+        a(class='w-full text-center px-6 py-3 border-2 border-primary text-primary rounded-lg font-sans text-lg font-semibold no-underline' href='/login') Login
+        a(class='w-full text-center px-6 py-3 bg-primary text-on-primary rounded-lg font-sans text-lg font-semibold no-underline' href='/signup') Sign Up
 
 script.
   document.addEventListener('DOMContentLoaded', function() {
     var toggle = document.getElementById('user-dropdown-toggle');
     var menu = document.getElementById('user-dropdown-menu');
     var chevron = document.getElementById('dropdown-chevron');
-    if (!toggle || !menu) return;
+    
+    var mobileToggle = document.getElementById('mobile-menu-toggle');
+    var mobileClose = document.getElementById('mobile-menu-close');
+    var mobileMenu = document.getElementById('mobile-menu');
 
-    toggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      var isOpen = menu.classList.contains('opacity-100');
-      if (isOpen) {
-        menu.classList.remove('opacity-100', 'visible', 'translate-y-0');
-        menu.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        chevron.style.transform = 'rotate(0deg)';
-      } else {
-        menu.classList.remove('opacity-0', 'invisible', 'translate-y-2');
-        menu.classList.add('opacity-100', 'visible', 'translate-y-0');
-        chevron.style.transform = 'rotate(180deg)';
-      }
-    });
+    if (toggle && menu) {
+      toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var isOpen = menu.classList.contains('opacity-100');
+        if (isOpen) {
+          menu.classList.remove('opacity-100', 'visible', 'translate-y-0');
+          menu.classList.add('opacity-0', 'invisible', 'translate-y-2');
+          chevron.style.transform = 'rotate(0deg)';
+        } else {
+          menu.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+          menu.classList.add('opacity-100', 'visible', 'translate-y-0');
+          chevron.style.transform = 'rotate(180deg)';
+        }
+      });
 
-    document.addEventListener('click', function(e) {
-      if (!document.getElementById('user-dropdown-container').contains(e.target)) {
-        menu.classList.remove('opacity-100', 'visible', 'translate-y-0');
-        menu.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        chevron.style.transform = 'rotate(0deg)';
-      }
-    });
+      document.addEventListener('click', function(e) {
+        var container = document.getElementById('user-dropdown-container');
+        if (container && !container.contains(e.target)) {
+          menu.classList.remove('opacity-100', 'visible', 'translate-y-0');
+          menu.classList.add('opacity-0', 'invisible', 'translate-y-2');
+          chevron.style.transform = 'rotate(0deg)';
+        }
+      });
+    }
+
+    if (mobileToggle && mobileMenu && mobileClose) {
+      mobileToggle.addEventListener('click', function() {
+        mobileMenu.classList.remove('opacity-0', 'invisible');
+        mobileMenu.classList.add('opacity-100', 'visible');
+        document.body.style.overflow = 'hidden';
+      });
+
+      mobileClose.addEventListener('click', function() {
+        mobileMenu.classList.remove('opacity-100', 'visible');
+        mobileMenu.classList.add('opacity-0', 'invisible');
+        document.body.style.overflow = '';
+      });
+      
+      var mobileLinks = mobileMenu.querySelectorAll('a');
+      mobileLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+          mobileMenu.classList.remove('opacity-100', 'visible');
+          mobileMenu.classList.add('opacity-0', 'invisible');
+          document.body.style.overflow = '';
+        });
+      });
+    }
   });
