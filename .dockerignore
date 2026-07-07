@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log*
+.git
+.gitignore
+.cache
+.vscode
+.idea
+*.md
+*.txt
+.DS_Store
+Thumbs.db
+.prettierrc
+.eslintrc.json
+stitch_natours_adventure_redesign/

@@ -1,0 +1,17 @@
+
+services:
+  natours:
+    
+    build: .
+    container_name: natours-app
+    
+    restart: unless-stopped
+    
+    ports:
+      - "3000:3000"
+    
+    env_file:
+      - config.env
+    
+    environment:
+      - NODE_ENV=production

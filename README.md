@@ -9,6 +9,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-8.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
 [![Pug](https://img.shields.io/badge/Pug-Templates-A86454?style=for-the-badge&logo=pug&logoColor=white)](https://pugjs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-docker)
 [![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](LICENSE)
 
 <br/>
@@ -195,6 +196,7 @@ Natours/
 | **Styling** | Tailwind CSS (CDN) + Custom CSS |
 | **Typography** | Noto Serif + Plus Jakarta Sans |
 | **Icons** | Material Symbols Outlined |
+| **Containerization** | Docker + Docker Compose |
 | **Linting** | ESLint 9 + Prettier |
 
 <br/>
@@ -275,6 +277,56 @@ npm run watch:js
 # Production mode
 npm run prod
 ```
+
+The app will be running at **`http://localhost:3000`**
+
+### 🐳 Docker
+
+You can also run Natours using Docker — no Node.js installation required.
+
+#### Quick Start (Docker Run)
+
+```bash
+# Build the image
+docker build -t natours:1.0 .
+
+# Run the container
+docker run -d --name natours-app -p 3000:3000 --env-file config.env -e NODE_ENV=development natours:1.0
+```
+
+#### Using Docker Compose
+
+```bash
+# Build and start
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# Stop
+docker compose down
+```
+
+#### Pull from Docker Hub
+
+No need to clone the repo — just pull the pre-built image:
+
+```bash
+docker pull adityapratap07/natours:latest
+
+docker run -d --name natours-app -p 3000:3000 \
+  -e NODE_ENV=development \
+  -e DATABASE=your_mongodb_connection_string \
+  -e DATABASE_PASSWORD=your_password \
+  -e JWT_SECRET=your_jwt_secret \
+  -e JWT_EXPIRESIN=90d \
+  -e JWT_COOKIE_EXPIRES_IN=90 \
+  -e STRIPE_SECRET_KEY=sk_test_... \
+  -e MAPBOX_TOKEN=pk.eyJ1... \
+  adityapratap07/natours:latest
+```
+
+> **Note:** Replace the environment variable values above with your own credentials. See [Environment Variables](#environment-variables) for the full list.
 
 The app will be running at **`http://localhost:3000`**
 
